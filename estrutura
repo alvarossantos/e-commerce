@@ -1,0 +1,8 @@
+projeto-ecommerce/
+├── main.py                # Ponto de entrada (Server e roteamento)
+└── src/
+    ├── controllers/       # Lógica de orquestração e HTTP
+    ├── models/            # Entidades e regras de negócio puras
+    ├── views/             # Representação (JSON ou HTML dinâmico)
+    ├── repository/        # SQL puro e acesso ao banco (DAO)
+    └── database/          # Conexão e migrações

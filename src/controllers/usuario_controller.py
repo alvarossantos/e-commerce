@@ -1,0 +1,61 @@
+from src.models.usuario_model import UsuarioModel
+from src.repository.usuario_repository import UsuarioRepository
+from src.controllers.seguranca import Seguranca
+
+class UsuarioController:
+    def __init__(self):
+        self.repository = UsuarioRepository()
+
+    def registrar_usuario(self, nome, email, senha_pura, cpf, telefone, endereco, data_nasc):
+        try:
+            # 1. Preparar a senha (usando a classe Seguranca)
+            senha_hash = Seguranca.gerar_hash(senha_pura)
+
+            # 2. Tentar criar o objeto (Vai disparar validações do Model)
+            novo_usuario = UsuarioModel(
+                nome=nome,
+                email=email,
+                senha_hash=senha_hash,
+                ativo=True,
+                data_nascimento=data_nasc,
+                cpf=cpf,
+                telefone=telefone,
+                endereco=endereco
+            )
+
+            # 3. Tenta salvar no banco via Repository
+            self.repository.criar(novo_usuario)
+
+            return {"status": "sucesso", "mensagem": "Usuário criado!", "id": novo_usuario}, 201
+        except ValueError as e:
+            # Erro veio das verificações do MODEL (idade, email, cpf e telefone)
+            return {"status": "erro", "mensagem": str(e)}, 400
+
+        except Exception as e:
+            # Se o erro for de duplicidade no Postgres
+            if "unique constraint" in str(e).lower():
+                return {"status": "erro", "mensagem": "CPF ou E-mail já cadastrado."}, 409
+
+            return {"status": "erro", "mensagem": "Erro interno no servidor."}, 500
+
+    def fazer_login(self, email, senha_pura):
+        # Busca o usuário
+        usuario = self.repository.buscar_por_email(email)
+
+        # Se o objeto usuario é None, ele não existe no banco
+        if usuario is None:
+            return {"status": "erro", "mensagem": "E-mail ou senha incorretos."}, 401
+
+        # Se chegou aqui, o usuario existe. Testar a sua senha
+        senha_valida = Seguranca.verificar_senha(senha_pura, usuario.senha_hash)
+
+        if senha_valida:
+            # Login com sucesso!
+            return {
+                "status": "sucesso",
+                "mensagem": f"Bem-vindo, {usuario.nome}!",
+                "usuario_id": usuario.id
+            }, 200
+        else:
+            # Senha errada
+            return {"status": "erro", "mensagem": "Senha incorreta."}, 401
