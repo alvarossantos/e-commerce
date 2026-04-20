@@ -5,4 +5,5 @@ projeto-ecommerce/
     ├── models/            # Entidades e regras de negócio puras
     ├── views/             # Representação (JSON ou HTML dinâmico)
     ├── repository/        # SQL puro e acesso ao banco (DAO)
+    ├── service            # Serviços de Email/Venda
     └── database/          # Conexão e migrações
