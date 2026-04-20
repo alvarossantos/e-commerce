@@ -7,7 +7,7 @@ class PedidoRepository:
         # Simplificado: status 'pendente' e o valor 0 são automáticos
         sql = "INSERT INTO pedidos (usuario_id) VALUES (%s) RETURNING id;"
         with BancoDeDados() as cursor:
-            cursor.execute(sql, (usuario_id))
+            cursor.execute(sql, (usuario_id,))
             return cursor.fetchone()[0]
 
     def inserir_item(self, pedido_id, produto_id, quantidade, preco_unitario, cursor_externo=None):
@@ -16,10 +16,9 @@ class PedidoRepository:
             INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario)
             VALUES (%s, %s, %s, %s);
         """
-        params = (pedido_id, produto_id, quantidade, preco_unitario)
 
         with BancoDeDados() as cursor:
-            cursor.execute(sql, (params,))
+            cursor.execute(sql, (pedido_id, produto_id, quantidade, preco_unitario))
 
     def mudar_status(self, pedido_id, novo_status):
         sql = "UPDATE pedidos SET status = %s WHERE id = %s;"
@@ -35,7 +34,7 @@ class PedidoRepository:
         sql = """
             SELECT p.nome, ip.quantidade, ped.data_criacao
             FROM produtos p
-            JOIN itens_pedido ip 0N p.id = ip.produto_id
+            JOIN itens_pedido ip ON p.id = ip.produto_id
             JOIN pedidos ped ON ped.id = ip.pedido_id
             WHERE ped.status = 'cancelado'
             ORDER BY ped.data_criacao DESC;

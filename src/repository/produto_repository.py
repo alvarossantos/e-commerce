@@ -21,7 +21,7 @@ class ProdutoRepository:
         with BancoDeDados() as cursor:
             cursor.execute(sql, params)
             novo_id = cursor.fetchone()
-            return novo_id
+            return novo_id[0]
 
     def buscar_por_id(self, id):
         sql = """

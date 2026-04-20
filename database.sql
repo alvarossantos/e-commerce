@@ -51,8 +51,8 @@ CREATE TABLE pedidos (
     -- Status controlado por CHECK para integridade dos dados
     status VARCHAR(20) DEFAULT 'pendente'
         CHECK (status IN ('pendente', 'pago', 'enviado', 'entregue', 'cancelado')),
-    valor_total DECIMAL(10, 2) DEFAULT 0.00 -- Valor total do pedido (soma dos itens)
-    alertas_enviados INTEGER DEFAULT 0;
+    valor_total DECIMAL(10, 2) DEFAULT 0.00, -- Valor total do pedido (soma dos itens)
+    alertas_enviados INTEGER DEFAULT 0
 );
 
 -- Tabela de Itens do Pedido: Relacionamento Muitos-para-Muitos entre Pedidos e Produtos
