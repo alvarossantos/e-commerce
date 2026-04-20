@@ -41,7 +41,7 @@ class UsuarioRepository:
                     id=row[0],
                     nome=row[1],
                     email=row[2],
-                    senha_hash=[3],
+                    senha_hash=row[3],
                     ativo=row[4],
                     data_nascimento=str(row[5]),
                     cpf=row[6],

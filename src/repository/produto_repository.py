@@ -36,15 +36,16 @@ class ProdutoRepository:
 
             if row:
                 # Retorna um dicionário com os dados mapeados
-                return {
-                    "nome": row[0],
-                    "sku": row[1],
-                    "preco": row[2],
-                    "descricao": row[3],
-                    "codigo_barras": row[4],
-                    "categoria": row[5],
-                    "criado_em": row[6]
-                }
+                return ProdutoModel(
+                    nome=row[0],
+                    sku=row[1],
+                    preco=row[2],
+                    descricao=row[3],
+                    codigo_barras=row[4],
+                    categoria=row[5],
+                    criado_em=row[6],
+                    id=id # Passando o ID para o construtor
+                )
 
             # Caso não encontre nada, retorna None
             return None

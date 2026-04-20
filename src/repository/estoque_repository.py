@@ -6,7 +6,7 @@ from src.models.produto_model import ProdutoModel
 class EstoqueRepository:
     def buscar_produtos_em_alerta(self, produto: ProdutoModel, estoque: EstoqueModel):
         sql = """
-            SELECT p.nome, e.quantidade
+            SELECT p.nome, e.quantidade, e.estoque_minimo
             FROM produtos p
             JOIN estoque e ON p.id = e.produto_id
             WHERE e.quantidade <= e.estoque_minimo 
