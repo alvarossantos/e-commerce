@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    {% for produto in produtos %}
+    <div class="col-md-3 mb-4">
+        <div class="card h-100 card-product border-0 shadow-sm">
+            <img src="https://via.placeholder.com/300" class="card-img-top" alt="{{ produto.nome }}">
+            <div class="card-body text-center">
+                <h5 class="card-title fw-bold">{{ produto.nome }}</h5>
+                <p class="text-primary fs-4 fw-bold">R$ {{ "%.2f"|format(produto.preco) }}</p>
+                <button class="btn btn-dark w-100">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

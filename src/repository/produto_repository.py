@@ -23,6 +23,22 @@ class ProdutoRepository:
             novo_id = cursor.fetchone()
             return novo_id[0]
 
+    def listar_todos(self):
+        sql = """SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em "
+               "FROM produtos "
+               "ORDER BY criado_em DESC;"""
+        with BancoDeDados() as cursor:
+            cursor.execute(sql)
+
+    def buscar_por_categoria(self, categoria):
+        sql = """
+            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em
+            FROM produtos
+            WHERE categoria = %s;
+        """
+        with BancoDeDados() as cursor:
+            ... # Pode me ajudar no listar_todos e nessa função
+
     def buscar_por_id(self, id):
         sql = """
             SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em
