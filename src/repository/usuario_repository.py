@@ -17,8 +17,8 @@ class UsuarioRepository:
                  Também atualiza o atributo 'id' do objeto usuario passado como parâmetro.
         """
         sql = """
-            INSERT INTO usuarios (nome, email, senha_hash, cpf, data_nascimento, telefone, endereco)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO usuarios (nome, email, senha_hash, cpf, data_nascimento, telefone)
+            VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING id;
         """
         params = (
@@ -27,8 +27,7 @@ class UsuarioRepository:
             usuario.senha_hash,
             usuario.cpf,
             usuario.data_nascimento,
-            usuario.telefone,
-            usuario.endereco
+            usuario.telefone
         )
 
         with BancoDeDados() as cursor:
@@ -72,3 +71,8 @@ class UsuarioRepository:
                     ativo=row[9],
                 )
             return None
+
+    def atualizar_foto(self, usuario_id, caminho_foto):
+        sql = "UPDATE usuarios SET url_foto = %s WHERE id = %s;"
+        with BancoDeDados() as cursor:
+            cursor.execute(sql, (caminho_foto, usuario_id))

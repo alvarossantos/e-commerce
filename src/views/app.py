@@ -1,6 +1,7 @@
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from src.controllers.usuario_controller import UsuarioController
+from src.repository.endereco_repository import EnderecoRepository
 from src.repository.produto_repository import ProdutoRepository
 import os
 from werkzeug.utils import secure_filename
@@ -27,6 +28,7 @@ app.secret_key = 'sua_chave_secreta_aqui' # Necessário para mensagens de erro/s
 produto_repo = ProdutoRepository()
 usuario_ctrl = UsuarioController()
 usuario_repo = UsuarioRepository()
+endereco_repo = EnderecoRepository()
 
 # CONCEITO: Camada de Apresentação (Início das Rotas ‘Web’)
 @app.route('/')
@@ -80,12 +82,11 @@ def cadastro():
         senha = request.form.get('senha')
         cpf = request.form.get('cpf')
         telefone = request.form.get('telefone')
-        endereco = request.form.get('endereco')
-        data_nasc = request.form.get('data_nasc')
+        data_nascimento = request.form.get('data_nascimento')
 
         # Chama a inteligência do Controller
         resposta, status_code = usuario_ctrl.registrar_usuario(
-            nome, email, senha, cpf, telefone, endereco, data_nasc
+            nome, email, senha, cpf, telefone, data_nascimento
         )
 
         if status_code == 201:
@@ -112,9 +113,21 @@ def atualizar_foto():
         usuario_repo.atualizar_foto(session['usuario_id'], caminho_db)
 
         # Atualiza a Sessão para o cabeçalho mudar
-        session['usuario_id'] = caminho_db
+        session['usuario_foto'] = f"caminho_db"
 
     return redirect(url_for('perfil'))
+
+@app.route('/perfil')
+def perfil():
+    # Proteção de Rota: Só entra quem está logado
+    if 'usuario_id' not in session:
+        flash('Faça login para acessar seu perfil.', 'warning')
+        return redirect(url_for('login'))
+
+    # Busca os endereços cadastrados deste usuário
+    lista_enderecos = endereco_repo.listar_por_usuario(session['usuario_id'])
+
+    return render_template('perfil.html', enderecos=lista_enderecos)
 
 if __name__ == '__main__':
     app.run(debug=True)

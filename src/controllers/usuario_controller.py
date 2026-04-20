@@ -6,7 +6,7 @@ class UsuarioController:
     def __init__(self):
         self.repository = UsuarioRepository()
 
-    def registrar_usuario(self, nome, email, senha_pura, cpf, telefone, endereco, data_nasc):
+    def registrar_usuario(self, nome, email, senha_pura, cpf, telefone, data_nascimento):
         try:
             # 1. Preparar a senha (usando a classe Seguranca)
             senha_hash = Seguranca.gerar_hash(senha_pura)
@@ -17,10 +17,9 @@ class UsuarioController:
                 email=email,
                 senha_hash=senha_hash,
                 ativo=True,
-                data_nascimento=data_nasc,
+                data_nascimento=data_nascimento,
                 cpf=cpf,
-                telefone=telefone,
-                endereco=endereco
+                telefone=telefone
             )
 
             # 3. Tenta salvar no banco via Repository

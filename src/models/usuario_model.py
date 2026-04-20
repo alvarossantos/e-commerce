@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class UsuarioModel:
-    def __init__(self, nome, email, senha_hash, ativo, data_nascimento, cpf, telefone, endereco, id=None, criado_em=None):
+    def __init__(self, nome, email, senha_hash, ativo, data_nascimento, cpf, telefone, id=None, criado_em=None):
         self.id = id
         self.nome = nome
         self.verificar_email(email)
@@ -11,7 +11,6 @@ class UsuarioModel:
         self.verificar_cpf(cpf)
         self.verificar_idade(data_nascimento)
         self.verificar_telefone(telefone)
-        self.endereco = endereco
         self.criado_em = criado_em
         self.ativo = ativo
 
