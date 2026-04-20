@@ -51,7 +51,10 @@ class UsuarioController:
             return {
                 "status": "sucesso",
                 "mensagem": f"Bem-vindo, {usuario.nome}!",
-                "usuario_id": usuario.id
+                "usuario": {
+                    "id": usuario.id,
+                    "nome": usuario.nome
+                }
             }, 200
         else:
             # Senha errada

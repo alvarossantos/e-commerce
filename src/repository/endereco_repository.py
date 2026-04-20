@@ -4,7 +4,7 @@ from src.database.conexao import BancoDeDados
 class EnderecoRepository:
     def criar(self, usuario_id, dados:dict):
         sql = """
-            INSERT INTO endereco (usuario_id, logradouro, numero, bairro, cidade, estado, cep, complemento)
+            INSERT INTO enderecos (usuario_id, logradouro, numero, bairro, cidade, estado, cep, complemento)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;
         """
         params = (

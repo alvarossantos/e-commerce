@@ -64,7 +64,7 @@ def login():
             session['usuario_nome'] = resposta['usuario']['nome']
 
             # Caso ainda não tenha upload de foto, usamos uma imagem padrão
-            session['usuario_foto'] = "/static/img/default-user.png"
+            session['usuario_foto'] = "/static/img/usuarios/default-user.png"
 
             return redirect(url_for('index'))
         else:
@@ -72,6 +72,17 @@ def login():
             flash(resposta['mensagem'], 'danger')
 
     return render_template('login.html')
+
+@app.route('/sair')
+def logout():
+    """
+    Rota para encerrar a sessão do usuário.
+    Limpa o cookie de sessão e redireciona para a página inicial.
+    :return:
+    """
+    session.clear()
+    flash('Você saiu da sua conta.', 'info')
+    return redirect(url_for('index'))
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
@@ -97,26 +108,6 @@ def cadastro():
 
     return render_template('cadastro.html')
 
-@app.route('/perfil/foto', methods=['POST'])
-def atualizar_foto():
-    if 'foto' not in request.files:
-        return redirect(url_for('perfil'))
-
-    arquivo = request.files['foto']
-    if arquivo.filename != '':
-        filename = secure_filename(f"user_{session['usuario_id']}_{arquivo.filename}")
-        caminho_salvar = os.path.join('src/views/static/uploads/usuarios', filename)
-        arquivo.save(caminho_salvar)
-
-        # Atualiza no Banco via UsuarioRepository
-        caminho_db = f"/static/uploads/usuarios/{filename}"
-        usuario_repo.atualizar_foto(session['usuario_id'], caminho_db)
-
-        # Atualiza a Sessão para o cabeçalho mudar
-        session['usuario_foto'] = caminho_db
-
-    return redirect(url_for('perfil'))
-
 @app.route('/perfil')
 def perfil():
     # Proteção de Rota: Só entra quem está logado
@@ -128,6 +119,31 @@ def perfil():
     lista_enderecos = endereco_repo.listar_por_usuario(session['usuario_id'])
 
     return render_template('perfil.html', enderecos=lista_enderecos)
+
+@app.route('/perfil/foto', methods=['POST'])
+def atualizar_foto():
+    if 'foto' not in request.files:
+        return redirect(url_for('perfil'))
+
+    arquivo = request.files['foto']
+    if arquivo.filename != '':
+        filename = secure_filename(f"user_{session['usuario_id']}_{arquivo.filename}")
+        caminho_salvar = os.path.join('src/views/static/uploads/usuarios', filename)
+
+        # Garante que a pasta existe antes de tentar salvar a foto de perfil
+        os.makedirs(os.path.dirname(caminho_salvar), exist_ok=True)
+
+        arquivo.save(caminho_salvar)
+
+        # Atualiza no Banco via UsuarioRepository
+        caminho_db = f"/static/uploads/usuarios/{filename}"
+        usuario_repo.atualizar_foto(session['usuario_id'], caminho_db)
+
+        # Atualiza a Sessão para o cabeçalho mudar
+        session['usuario_foto'] = caminho_db
+
+    return redirect(url_for('perfil'))
+
 
 @app.route('/perfil/endereco', methods=['POST'])
 def novo_endereco():
@@ -153,6 +169,19 @@ def novo_endereco():
         print(f"Erro ao salvar endereço: {e}")
         flash('Erro ao cadastrar endereço.', 'danger')
 
+    return redirect(url_for('perfil'))
+
+@app.route('/carrinho')
+def carrinho():
+    flash('Carrinho de compras em desenvolvimento', 'info')
+    return redirect(request.referrer or url_for('index'))
+
+@app.route('/meus-pedidos')
+def meus_pedidos():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    flash('A página de pedidos em desenvolvimento', 'info')
     return redirect(url_for('perfil'))
 
 if __name__ == '__main__':
