@@ -109,11 +109,11 @@ def atualizar_foto():
         arquivo.save(caminho_salvar)
 
         # Atualiza no Banco via UsuarioRepository
-        caminho_db = f"static/uploads/usuarios/{filename}"
+        caminho_db = f"/static/uploads/usuarios/{filename}"
         usuario_repo.atualizar_foto(session['usuario_id'], caminho_db)
 
         # Atualiza a Sessão para o cabeçalho mudar
-        session['usuario_foto'] = f"caminho_db"
+        session['usuario_foto'] = caminho_db
 
     return redirect(url_for('perfil'))
 
@@ -128,6 +128,32 @@ def perfil():
     lista_enderecos = endereco_repo.listar_por_usuario(session['usuario_id'])
 
     return render_template('perfil.html', enderecos=lista_enderecos)
+
+@app.route('/perfil/endereco', methods=['POST'])
+def novo_endereco():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    # Coleta os dados do Model de Endereço
+    dados_endereco = {
+        'cep': request.form.get('cep'),
+        'rua': request.form.get('rua'),
+        'numero': request.form.get('numero'),
+        'bairro': request.form.get('bairro'),
+        'complemento': request.form.get('complemento'),
+        'cidade': request.form.get('cidade'),
+        'estado': request.form.get('estado')
+    }
+
+    try:
+        # Usa o repositório para salvar no banco
+        endereco_repo.criar(session['usuario_id'], dados_endereco)
+        flash('Endereço cadastrado com sucesso!', 'success')
+    except Exception as e:
+        print(f"Erro ao salvar endereço: {e}")
+        flash('Erro ao cadastrar endereço.', 'danger')
+
+    return redirect(url_for('perfil'))
 
 if __name__ == '__main__':
     app.run(debug=True)
