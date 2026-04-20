@@ -32,11 +32,9 @@ class UsuarioController:
             return {"status": "erro", "mensagem": str(e)}, 400
 
         except Exception as e:
-            # Se o erro for de duplicidade no Postgres
-            if "unique constraint" in str(e).lower():
-                return {"status": "erro", "mensagem": "CPF ou E-mail já cadastrado."}, 409
-
-            return {"status": "erro", "mensagem": "Erro interno no servidor."}, 500
+            # Captura os erros de validação do Model (CPF inválido, Senha fraca, etc)
+            print(f"Erro fatal: {e}")
+            return {"status": "erro", "mensagem": "Erro interno ao criar conta."}, 500
 
     def fazer_login(self, email, senha_pura):
         # Busca o usuário

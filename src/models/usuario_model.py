@@ -8,23 +8,21 @@ class UsuarioModel:
         self.nome = nome
         self.verificar_email(email)
         self.senha_hash = senha_hash
-        self.ativo = ativo
-        self.criado_em = criado_em
-        self.verificar_idade(data_nascimento)
         self.verificar_cpf(cpf)
+        self.verificar_idade(data_nascimento)
         self.verificar_telefone(telefone)
         self.endereco = endereco
+        self.criado_em = criado_em
+        self.ativo = ativo
 
     def verificar_email(self, email):
         if "@" in email:
-            print(f"Email válido: {email}")
             self.email = email
         else:
             raise ValueError(f"Email inválido, não possui '@': {email}")
 
     def verificar_cpf(self, cpf):
         if cpf.isdigit() and len(cpf) == 11:
-            print(f"CPF válido: {cpf}")
             self.cpf = cpf
         else:
             raise ValueError(f"CPF inválido, somente números são aceitos e deve ter 11 digitos.")
@@ -38,11 +36,12 @@ class UsuarioModel:
         aceito = bool(re.match(padrao, telefone))
         if aceito:
             print(f"Telefone válido: {telefone}")
+            self.telefone = telefone
         else:
             raise ValueError(f"Telefone inválido: {telefone}")
 
     def verificar_idade(self, data_nascimento):
-        data_nasc = datetime.strptime(data_nascimento, "%d/%m/%Y")
+        data_nasc = datetime.strptime(data_nascimento, '%Y-%m-%d')
         data_atual = datetime.now()
 
         # Calcula idade em anos
@@ -55,6 +54,6 @@ class UsuarioModel:
         # Verificação de maioridade
         if idade >= 18:
             print(f"O usuário tem {idade} anos.")
-            self.idade = idade
+            self.data_nascimento = data_nascimento
         else:
             raise ValueError(f"O usuário tem {idade} anos, não pode realizar compra.")

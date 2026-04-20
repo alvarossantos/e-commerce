@@ -2,7 +2,17 @@ from src.database.conexao import BancoDeDados
 
 
 class PedidoRepository:
-    def criar(self, usuario_id, valor_total):
+    def criar(self, usuario_id: int) -> int:
+        """
+        Cria o cabeçalho de um novo pedido para um usuário.
+        O status inicial é sempre 'pendente' e o valor 0.00.
+
+        Args:
+            usuario_id (int): O 'ID' do cliente realizando a compra.
+
+        Returns:
+            int: O 'ID' do novo pedido gerado pelo banco de dados.
+        """
         # Cria o pedido inicial (cabeçalho)
         # Simplificado: status 'pendente' e o valor 0 são automáticos
         sql = "INSERT INTO pedidos (usuario_id) VALUES (%s) RETURNING id;"
@@ -10,7 +20,20 @@ class PedidoRepository:
             cursor.execute(sql, (usuario_id,))
             return cursor.fetchone()[0]
 
-    def inserir_item(self, pedido_id, produto_id, quantidade, preco_unitario, cursor_externo=None):
+    def inserir_item(self, pedido_id, produto_id, quantidade, preco_unitario):
+        """
+        Insere um produto como item em um pedido existente.
+
+        Args:
+            pedido_id (int): O 'ID' do pedido onde o item será adicionado.
+            produto_id (int): O 'ID' do produto a ser inserido no pedido.
+            quantidade (int): A quantidade do produto a ser adicionada.
+            preco_unitario (float): O preço unitário do produto no momento da compra.
+                                             Se None, cria uma nova conexão.
+
+        Returns:
+            None
+        """
         # Inseri um produto no pedido
         sql = """
             INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario)
@@ -21,16 +44,46 @@ class PedidoRepository:
             cursor.execute(sql, (pedido_id, produto_id, quantidade, preco_unitario))
 
     def mudar_status(self, pedido_id, novo_status):
+        """
+        Atualiza o status de um pedido existente.
+
+        Args:
+            pedido_id (int): O 'ID' do pedido a ser atualizado.
+            novo_status (str): O novo status do pedido. Valores válidos:
+                              'pendente', 'pago', 'enviado', 'entregue', 'cancelado'.
+
+        Returns:
+            None
+        """
         sql = "UPDATE pedidos SET status = %s WHERE id = %s;"
         with BancoDeDados() as cursor:
             cursor.execute(sql, (novo_status, pedido_id))
 
     def atualizar_total(self, pedido_id, valor_total):
+        """
+        Atualiza o valor total de um pedido.
+
+        Args:
+            pedido_id (int): O 'ID' do pedido a ser atualizado.
+            valor_total (float): O novo valor total do pedido.
+
+        Returns:
+            None
+        """
         sql = "UPDATE pedidos SET valor_total = %s WHERE id = %s;"
         with BancoDeDados() as cursor:
             cursor.execute(sql, (valor_total, pedido_id))
 
     def buscar_produtos_em_pedidos_cancelados(self):
+        """
+        Busca todos os produtos que apareceram em pedidos cancelados, com quantidade e data do pedido.
+
+        Returns:
+            list of dict: Cada dicionário contém:
+                - produto (str): Nome do produto.
+                - quantidade (int): Quantidade do produto no pedido cancelado.
+                - data (datetime): Data de criação do pedido cancelado.
+        """
         sql = """
             SELECT p.nome, ip.quantidade, ped.data_criacao
             FROM produtos p
@@ -52,6 +105,12 @@ class PedidoRepository:
         return cancelados
 
     def cancelar_pedidos_expirados(self):
+        """
+        Cancela pedidos pendentes que estão há mais de 48 horas sem atualização.
+
+        Returns:
+            int: Número de pedidos que foram cancelados.
+        """
         # Seleciona pedidos pendentes com mais de 48 horas
         sql = """
             UPDATE pedidos
@@ -64,6 +123,17 @@ class PedidoRepository:
             return cursor.rowcount # Retorna quantos pedidos foram cancelados
 
     def buscar_pendentes_para_notificacao(self):
+        """
+        Busca pedidos pendentes que estão há mais de 12 horas e ainda não receberam o próximo alerta.
+        O cálculo do intervalo considera o número de alertas já enviados (máximo de 3).
+
+        Returns:
+            list of dict: Cada dicionário contém:
+                - pedido_id (int): ID do pedido.
+                - cliente_nome (str): Nome do cliente.
+                - cliente_email (str): Email do cliente.
+                - total_alertas (int): Número de alertas já enviados para este pedido.
+        """
         # Busca pedidos criados há mais de 12h que ainda não receberam o próximo alerta
         sql = """
             SELECT p.id, u.nome, u.email, p.alertas_enviados, p.data_criacao
@@ -86,6 +156,15 @@ class PedidoRepository:
         return notificacoes
 
     def incrementar_alerta(self, pedido_id):
+        """
+        Incrementa o contador de alertas enviados para um pedido.
+
+        Args:
+            pedido_id (int): O 'ID' do pedido cujo contador de alertas será incrementado.
+
+        Returns:
+            None
+        """
         sql = "UPDATE pedidos SET alertas_enviados = alertas_enviados + 1 WHERE id = %s;"
         with BancoDeDados() as cursor:
             cursor.execute(sql , (pedido_id,))

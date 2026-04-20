@@ -8,6 +8,9 @@
             <div class="card-body text-center">
                 <h5 class="card-title fw-bold">{{ produto.nome }}</h5>
                 <p class="text-primary fs-4 fw-bold">R$ {{ "%.2f"|format(produto.preco) }}</p>
+                <a href="{{ url_for('detalhes_produto', id=produto.id) }}" class="btn btn-outline-dark w-100 fw-bold">
+                    Ver Detalhes
+                </a>
                 <button class="btn btn-dark w-100">Adicionar ao Carrinho</button>
             </div>
         </div>

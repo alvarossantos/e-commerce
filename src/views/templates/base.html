@@ -24,6 +24,30 @@
                 <a href="/carrinho" class="btn btn-primary"><i class="fas fa-shopping-cart"></i></a>
             </div>
         </div>
+        <div class="ms-auto d-flex align-items-center">
+            {% if session.usuario_id %}
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ session.usuario_foto }}" alt="Foto de {{ session.usuario_nome }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #fff;">
+                        <span>Olá, {{ session.usuario_nome.split(' ')[0] }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li><a class="dropdown-item" href="/perfil"><i class="fas fa-user-circle me-2"></i> Meu Perfil</a></li>
+                        <li><a class="dropdown-item" href="/meus-pedidos"><i class="fas fa-box me-2"></i> Meus Pedidos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair da Conta</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2 border-0 fw-bold">Entrar</a>
+                <a href="{{ url_for('cadastro') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Criar Conta</a>
+            {% endif %}
+
+            <a href="/carrinho" class="btn btn-link text-white ms-3 position-relative">
+                <i class="fas fa-shopping-cart fa-lg"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+            </a>
+        </div>
     </nav>
 
     <div class="container mt-4">

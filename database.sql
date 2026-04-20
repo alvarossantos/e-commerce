@@ -14,12 +14,28 @@ CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,                   -- Identificador único autoincrementado
     nome VARCHAR(100) NOT NULL,              -- Nome completo do usuário
     email VARCHAR(150) UNIQUE NOT NULL,      -- Email único (usado para login)
-    cpf VARCHAR(11) UNIQUE NOT NULL,        -- CPF (apenas números)
-    telefone VARCHAR(15),                   -- Formatos como (11) 99999-9999
-    endereco TEXT,                          -- TEXT é melhor para endereços longos
     senha_hash TEXT NOT NULL,                -- Hash da senha (nunca salvar texto plano!)
+    cpf VARCHAR(11) UNIQUE NOT NULL,        -- CPF (apenas números)
+    data_nascimento DATE NOT NULL,           -- Data de nascimento (AAAA-MM-DD)
+    telefone VARCHAR(15),                   -- Formatos como (11) 99999-9999
+    url_foto TEXT DEFAULT '/static/img/usuarios/default.png',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de registro
     ativo BOOLEAN DEFAULT TRUE               -- Define se o usuário pode logar
+);
+
+-- Tabela de Endereços: Armazena os endereços de cada usuário
+CREATE TABLE enderecos (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    logradouro VARCHAR(255) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    bairro VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado CHAR(2) NOT NULL,
+    cep CHAR(8) NOT NULL,
+    complemento VARCHAR(100),
+    principal BOOLEAN DEFAULT false,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela de Produtos: Cadastro do catálogo de itens
@@ -31,6 +47,7 @@ CREATE TABLE produtos (
     descricao TEXT,
     codigo_barras VARCHAR(13) UNIQUE,                -- Padrão EAN-13, por exemplo
     categoria VARCHAR(100),                          -- Classificação do item
+    url_imagem TEXT DEFAULT '/static/img/produtos/placeholder.png'
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

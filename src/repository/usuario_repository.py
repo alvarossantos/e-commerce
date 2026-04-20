@@ -4,8 +4,20 @@ from src.models.usuario_model import UsuarioModel
 
 class UsuarioRepository:
     def criar(self, usuario: UsuarioModel):
+        """
+        Cria um novo usuário no banco de dados.
+
+        Args:
+            usuario (UsuarioModel): Objeto contendo todos os dados do usuário a ser criado.
+                                   Deve incluir nome, email, senha_hash, cpf, telefone,
+                                   endereco e data_nascimento.
+
+        Returns:
+            int: O 'ID' do novo usuário gerado pelo banco de dados.
+                 Também atualiza o atributo 'id' do objeto usuario passado como parâmetro.
+        """
         sql = """
-            INSERT INTO usuarios (nome, email, senha_hash, cpf, telefone, endereco, data_nascimento)
+            INSERT INTO usuarios (nome, email, senha_hash, cpf, data_nascimento, telefone, endereco)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """
@@ -14,9 +26,9 @@ class UsuarioRepository:
             usuario.email,
             usuario.senha_hash,
             usuario.cpf,
+            usuario.data_nascimento,
             usuario.telefone,
-            usuario.endereco,
-            usuario.data_nascimento
+            usuario.endereco
         )
 
         with BancoDeDados() as cursor:
@@ -26,8 +38,18 @@ class UsuarioRepository:
             return novo_id
 
     def buscar_por_email(self, email: str):
+        """
+        Busca um usuário pelo seu email no banco de dados.
+
+        Args:
+            email (str): Email do usuário a ser buscado (deve ser único no sistema).
+
+        Returns:
+            UsuarioModel: Objeto contendo todos os dados do usuário se encontrado.
+                         Retorna None se nenhum usuário com esse email existir.
+        """
         sql = """
-            SELECT id, nome, email, senha_hash, ativo, data_nascimento, cpf, telefone, endereco, criado_em
+            SELECT id, nome, email, senha_hash, cpf, data_nascimento, telefone, endereco, criado_em, ativo
             FROM usuarios
             WHERE email = %s;
         """
@@ -42,11 +64,11 @@ class UsuarioRepository:
                     nome=row[1],
                     email=row[2],
                     senha_hash=row[3],
-                    ativo=row[4],
+                    cpf=row[4],
                     data_nascimento=str(row[5]),
-                    cpf=row[6],
-                    telefone=row[7],
-                    endereco=row[8],
-                    criado_em=row[9]
+                    telefone=row[6],
+                    endereco=row[7],
+                    criado_em=row[8],
+                    ativo=row[9],
                 )
             return None
