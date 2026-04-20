@@ -24,20 +24,48 @@ class ProdutoRepository:
             return novo_id[0]
 
     def listar_todos(self):
-        sql = """SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em "
+        sql = """SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, id "
                "FROM produtos "
                "ORDER BY criado_em DESC;"""
+        produtos = []
         with BancoDeDados() as cursor:
             cursor.execute(sql)
+            rows = cursor.fetchall()
+            for row in rows:
+                produtos.append(ProdutoModel(
+                    nome=row[0],
+                    sku=row[1],
+                    preco=row[2],
+                    descricao=row[3],
+                    codigo_barras=row[4],
+                    categoria=row[5],
+                    criado_em=row[6],
+                    id=row[7]
+                ))
+        return produtos
 
     def buscar_por_categoria(self, categoria):
         sql = """
-            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em
+            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, id
             FROM produtos
             WHERE categoria = %s;
         """
+        produtos = []
         with BancoDeDados() as cursor:
-            ... # Pode me ajudar no listar_todos e nessa função
+            cursor.execute(sql, (categoria,))
+            rows = cursor.fetchall()
+            for row in  rows:
+                produtos.append(ProdutoModel(
+                    nome=row[0],
+                    sku=row[1],
+                    preco=row[2],
+                    descricao=row[3],
+                    codigo_barras=row[4],
+                    categoria=row[5],
+                    criado_em=row[6],
+                    id=row[7]
+                ))
+        return produtos
 
     def buscar_por_id(self, id):
         sql = """
