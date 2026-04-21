@@ -47,7 +47,7 @@ CREATE TABLE produtos (
     descricao TEXT,
     codigo_barras VARCHAR(13) UNIQUE,                -- Padrão EAN-13, por exemplo
     categoria VARCHAR(100),                          -- Classificação do item
-    url_imagem TEXT DEFAULT '/static/img/produtos/placeholder.png'
+    url_imagem TEXT DEFAULT '/static/img/produtos/placeholder.png',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -144,3 +144,26 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER tg_cancelamento_pedido_estoque
 AFTER UPDATE ON pedidos
 FOR EACH ROW EXECUTE PROCEDURE gerenciar_cancelamento_pedido();
+
+-- 1. Inserindo os Produtos no Catálogo
+INSERT INTO produtos (nome, sku, preco, descricao, codigo_barras, categoria) VALUES
+('Processador AMD Ryzen 7 5800X', 'HW-AMD-5800X', 1850.00, 'Processador de alta performance com 8 núcleos e 16 threads, ideal para jogos pesados e renderização 3D.', '7301433127451', 'Hardware'),
+('Placa de Vídeo NVIDIA RTX 4060 Ti', 'HW-NV-4060TI', 2799.90, 'Placa de vídeo com 8GB GDDR6, suporte a Ray Tracing e DLSS 3 para máximo desempenho.', '8435156489721', 'Hardware'),
+('Placa Mãe Asus TUF Gaming B550M', 'HW-AS-B550M', 950.00, 'Placa mãe micro-ATX com excelente construção térmica e suporte a PCIe 4.0.', '4718017823561', 'Hardware'),
+('Teclado Mecânico HyperX Alloy Origins', 'PER-HX-ALLOY', 450.00, 'Teclado mecânico com switches vermelhos (Lineares) e iluminação RGB customizável.', '7406172886032', 'Periféricos'),
+('Mouse Gamer Logitech G Pro Wireless', 'PER-LG-GPRO', 580.00, 'Mouse sem fio ultraleve (80g) com sensor HERO 25K para e-sports.', '0978551421063', 'Periféricos'),
+('Headset Gamer Cloud II Vermelho', 'PER-HX-CL2', 499.90, 'Fones de ouvido com som surround 7.1 virtual e almofadas de espuma memory foam.', '7406172356710', 'Periféricos'),
+('Monitor LG UltraGear 24" 144Hz', 'MON-LG-24GN', 1100.00, 'Monitor IPS de 24 polegadas com tempo de resposta de 1ms e taxa de atualização de 144Hz.', '8806091325471', 'Monitores'),
+('Monitor Dell 27" 4K USB-C', 'MON-DL-274K', 2850.00, 'Monitor focado em produtividade e design com resolução 4K e hub USB-C integrado.', '5397184512034', 'Monitores');
+
+-- 2. Inserindo o Estoque (Assumindo que os IDs gerados acima foram de 1 a 8)
+-- O campo 'estoque_minimo' é o que você configurou para dar alerta!
+INSERT INTO estoque (produto_id, quantidade, estoque_minimo) VALUES
+(1, 15, 5),   -- Ryzen 7 (15 em estoque)
+(2, 8, 3),    -- RTX 4060 Ti (8 em estoque)
+(3, 20, 5),   -- Placa Mãe B550M
+(4, 50, 10),  -- Teclado HyperX
+(5, 35, 10),  -- Mouse Logitech
+(6, 40, 10),  -- Headset Cloud II
+(7, 12, 4),   -- Monitor UltraGear
+(8, 5, 2);    -- Monitor Dell 4K (Pouco estoque!)

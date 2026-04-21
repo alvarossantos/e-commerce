@@ -43,9 +43,11 @@ class ProdutoRepository:
             list of ProdutoModel: Lista contendo todos os produtos encontrados.
                                  Retorna lista vazia se nenhum produto estiver cadastrado.
         """
-        sql = """SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, id "
-               "FROM produtos "
-               "ORDER BY criado_em DESC;"""
+        sql = """
+            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, url_imagem, id
+            FROM produtos 
+            ORDER BY criado_em DESC;
+        """
         produtos = []
         with BancoDeDados() as cursor:
             cursor.execute(sql)
@@ -59,7 +61,8 @@ class ProdutoRepository:
                     codigo_barras=row[4],
                     categoria=row[5],
                     criado_em=row[6],
-                    id=row[7]
+                    url_imagem=row[7],
+                    id=row[8]
                 ))
         return produtos
 
@@ -75,7 +78,7 @@ class ProdutoRepository:
                                  Retorna lista vazia se nenhum produto for encontrado.
         """
         sql = """
-            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, id
+            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, url_imagem, id
             FROM produtos
             WHERE categoria = %s;
         """
@@ -92,7 +95,8 @@ class ProdutoRepository:
                     codigo_barras=row[4],
                     categoria=row[5],
                     criado_em=row[6],
-                    id=row[7]
+                    url_imagem=row[7],
+                    id=row[8]
                 ))
         return produtos
 
@@ -108,7 +112,7 @@ class ProdutoRepository:
                          Retorna None se nenhum produto com esse ID existir.
         """
         sql = """
-            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em
+            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, url_imagem
             FROM produtos
             WHERE id = %s;
         """
@@ -127,6 +131,7 @@ class ProdutoRepository:
                     codigo_barras=row[4],
                     categoria=row[5],
                     criado_em=row[6],
+                    url_imagem=row[7],
                     id=id # Passando o ID para o construtor
                 )
 
