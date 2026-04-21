@@ -1,9 +1,55 @@
 projeto-ecommerce/
-├── main.py                # Ponto de entrada (Server e roteamento)
-└── src/
-    ├── controllers/       # Lógica de orquestração e HTTP
-    ├── models/            # Entidades e regras de negócio puras
-    ├── views/             # Representação (JSON ou HTML dinâmico)
-    ├── repository/        # SQL puro e acesso ao banco (DAO)
-    ├── service            # Serviços de Email/Venda
-    └── database/          # Conexão e migrações
+├── database.sql             # Esquema do banco de dados e dados de exemplo
+├── requirements.txt         # Dependências Python
+├── .env.example             # Modelo de variáveis de ambiente
+├── README.md                # Documentação do projeto
+├── estrutura                # Este arquivo - estrutura do projeto
+├── src/
+│   ├── views/               # Camada de apresentação (Flask e templates)
+│   │   ├── app.py           # Ponto de entrada da aplicação Flask
+│   │   ├── templates/       # Templates HTML
+│   │   │   ├── index.html           # Página inicial
+│   │   │   ├── produto_detalhes.html # Página de detalhes do produto
+│   │   │   ├── login.html           # Página de login
+│   │   │   ├── cadastro.html        # Página de registro
+│   │   │   └── perfil.html          # Página de perfil do usuário
+│   │   └── static/          # Arquivos estáticos (CSS, JS, imagens)
+│   │       ├── img/
+│   │       │   ├── produtos/        # Imagens de produtos
+│   │       │   │   └── placeholder.png # Imagem padrão de produto
+│   │       │   └── usuarios/        # Imagens de usuários
+│   │       │       ├── default-user.png # Usuário padrão
+│   │       │       └── uploads/     # Uploads de fotos de perfil
+│   │       └── ...                  # Outros arquivos estáticos
+│   │
+│   ├── controllers/         # Controladores (lógica de orchestration e HTTP)
+│   │   ├── __init__.py
+│   │   ├── usuario_controller.py    # Controle de usuários
+│   │   ├── produto_controller.py    # Controle de produtos
+│   │   ├── pedido_controller.py     # Controle de pedidos
+│   │   └── seguranca.py             # Funções de segurança (hash, validação)
+│   │
+│   ├── models/              # Modelos (entidades e regras de negócio)
+│   │   ├── __init__.py
+│   │   ├── usuario_model.py       # Modelo de usuário
+│   │   ├── produto_model.py       # Modelo de produto
+│   │   └── estoque_model.py       # Modelo de estoque
+│   │
+│   ├── repository/          # Repositórios (camada de acesso aos dados)
+│   │   ├── __init__.py
+│   │   ├── usuario_repository.py    # Acesso a dados de usuários
+│   │   ├── produto_repository.py    # Acesso a dados de produtos
+│   │   ├── pedido_repository.py     # Acesso a dados de pedidos
+│   │   ├── endereco_repository.py   # Acesso a dados de endereços
+│   │   ├── estoque_repository.py    # Acesso a dados de estoque
+│   │   └── avaliacao_repository.py  # Acesso a dados de avaliações
+│   │
+│   ├── services/            # Serviços (integrações externas)
+│   │   ├── __init__.py
+│   │   ├── email_service.py       # Serviço de envio de emails
+│   │   └── venda_service.py       # Serviço de processamento de vendas
+│   │
+│   └── database/            # Utilitários de banco de dados
+│       ├── __init__.py
+│   │   └── conexao.py       # Gerenciamento de conexão com PostgreSQL
+└── venv/                    # Ambiente virtual Python (não versionado)

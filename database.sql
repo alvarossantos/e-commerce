@@ -52,6 +52,15 @@ CREATE TABLE produtos (
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE avaliacoes (
+    id SERIAL PRIMARY KEY,
+    produto_id INTEGER REFERENCES produtos(id) ON DELETE CASCADE,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    nota INTEGER CHECK (nota >= 1 AND nota <= 5),
+    comentario TEXT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela de Estoque: Controla a quantidade disponível de cada produto
 CREATE TABLE estoque (
     produto_id INTEGER PRIMARY KEY REFERENCES produtos(id) ON DELETE CASCADE, -- 1:1 com produtos
@@ -167,3 +176,8 @@ INSERT INTO estoque (produto_id, quantidade, estoque_minimo) VALUES
 (6, 40, 10),  -- Headset Cloud II
 (7, 12, 4),   -- Monitor UltraGear
 (8, 5, 2);    -- Monitor Dell 4K (Pouco estoque!)
+
+
+-- Inserir um comentário de teste (assumindo que o produto 1 e usuario 1 existem)
+INSERT INTO avaliacoes (produto_id, usuario_id, nota, comentario)
+VALUES (1, 1, 5, 'Produto excelente! Chegou super rápido e a qualidade é incrível. Recomendo muito.');

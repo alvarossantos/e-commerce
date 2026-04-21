@@ -1,6 +1,7 @@
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from src.controllers.usuario_controller import UsuarioController
+from src.repository.avaliacao_repository import AvaliacaoRepository
 from src.repository.endereco_repository import EnderecoRepository
 from src.repository.produto_repository import ProdutoRepository
 import os
@@ -29,6 +30,7 @@ produto_repo = ProdutoRepository()
 usuario_ctrl = UsuarioController()
 usuario_repo = UsuarioRepository()
 endereco_repo = EnderecoRepository()
+avaliacao_repo = AvaliacaoRepository()
 
 # CONCEITO: Camada de Apresentação (Início das Rotas ‘Web’)
 @app.route('/')
@@ -41,12 +43,31 @@ def index():
 def detalhes_produto(id):
     # Busca o produto específico no banco de dados usando o seu Repository
     produto_atual = produto_repo.buscar_por_id(id)
-
     if not produto_atual:
         flash('Produto não encontrado.', 'danger')
         return redirect(url_for('index'))
 
-    return render_template('produto_detalhes.html', produto=produto_atual)
+    # Busca os comentários deste produto específico
+    comentarios = avaliacao_repo.listar_por_produto(id)
+
+    # Passamos os comentários para o HTML
+    return render_template('produto_detalhes.html', produto=produto_atual, comentarios=comentarios)
+
+@app.route('/produto/<int:id>/avaliar', methods=['POST'])
+def avaliar_produto(id):
+    # Proteção: Só quem está logado pode comentar
+    if 'usuario_id' not in session:
+        flash('Faça login para avaliar o produto.', 'warning')
+        return redirect(url_for('login'))
+
+    nota = request.form.get('nota')
+    comentario = request.form.get('comentario')
+
+    # Salva no banco
+    avaliacao_repo.criar(id, session['usuario_id'], nota, comentario)
+    flash('Avaliação enviada com sucesso!', 'success')
+
+    return redirect(url_for('detalhes_produto', id=id))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

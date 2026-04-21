@@ -54,6 +54,70 @@
     </div>
 </div>
 
+<div class="row mt-5 pt-4 border-top">
+    <div class="col-md-8 mx-auto">
+        <h3 class="fw-bold mb-4">Opiniões sobre o produto</h3>
+
+        {% if session.usuario_id %}
+            <div class="card bg-light border-0 rounded-4 mb-5 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3">Deixe sua avaliação</h5>
+                <form action="/produto/{{ produto.id }}/avaliar" method="POST">
+                    <div class="mb-3 d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 fw-bold">Nota:</label>
+                        <select name="nota" class="form-select w-auto border-0 shadow-sm" required>
+                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                            <option value="4">⭐⭐⭐⭐ Muito Bom</option>
+                            <option value="3">⭐⭐⭐ Bom</option>
+                            <option value="2">⭐⭐ Ruim</option>
+                            <option value="1">⭐ Péssimo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control border-0 shadow-sm" name="comentario" rows="3" placeholder="Conte aos outros o que você achou deste produto..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4">Enviar Avaliação</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary rounded-4 text-center p-4 mb-5 border-0">
+                <p class="mb-2">Quer compartilhar sua opinião?</p>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-dark rounded-pill fw-bold">Faça login para avaliar</a>
+            </div>
+        {% endif %}
+
+        {% if comentarios %}
+            <div class="d-flex flex-column gap-4">
+                {% for com in comentarios %}
+                    <div class="d-flex gap-3">
+                        <img src="{{ com[4] }}" alt="Foto do usuário" class="rounded-circle shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="fw-bold mb-0">{{ com[3] }}</h6>
+                                <small class="text-muted">{{ com[2].strftime('%d/%m/%Y') }}</small>
+                            </div>
+
+                            <div class="text-warning small mb-2">
+                                {% for i in range(com[0]) %} <i class="fas fa-star"></i> {% endfor %}
+                                {% for i in range(5 - com[0]) %} <i class="far fa-star text-muted"></i> {% endfor %}
+                            </div>
+
+                            <p class="mb-0 text-dark">{{ com[1] }}</p>
+                        </div>
+                    </div>
+                    {% if not loop.last %}<hr class="text-muted opacity-25">{% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="far fa-comments fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Ainda não há avaliações</h5>
+                <p class="small text-muted">Seja o primeiro a avaliar este produto!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <script>
     document.getElementById('btn-plus').addEventListener('click', function() {
         let input = this.previousElementSibling;
