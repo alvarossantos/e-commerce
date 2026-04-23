@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4"><i class="fas fa-shopping-cart text-primary me-2"></i> Seu Carrinho</h2>
+
+    {% if itens %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 p-3">Produto</th>
+                            <th class="border-0 p-3 text-center">Quantidade</th>
+                            <th class="border-0 p-3 text-end">Preço Unit.</th>
+                            <th class="border-0 p-3 text-end">Subtotal</th>
+                            <th class="border-0 p-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in itens %}
+                        <tr>
+                            <td class="p-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ item.produto.url_imagem }}" class="rounded-3 me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <span class="fw-bold">{{ item.produto.nome }}</span>
+                                </div>
+                            </td>
+                            <td class="p-3 text-center">{{ item.quantidade }}</td>
+                            <td class="p-3 text-end text-muted">R$ {{ "%.2f"|format(item.produto.preco) }}</td>
+                            <td class="p-3 text-end fw-bold text-primary">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+                            <td class="p-3 text-center">
+                                <a href="{{ url_for('remover_item_carrinho', id=item.produto.id) }}" class="btn btn-sm btn-outline-danger border-0">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn btn-link text-decoration-none fw-bold">
+                <i class="fas fa-arrow-left me-1"></i> Continuar comprando
+            </a>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow rounded-4 p-4">
+                <h5 class="fw-bold mb-4">Resumo do Pedido</h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span>R$ {{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Entrega</span>
+                    <span class="text-success fw-bold">Grátis</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fs-5 fw-bold">Total</span>
+                    <span class="fs-5 fw-bold text-primary">R$ {{ "%.2f"|format(total) }}</span>
+                </div>
+                
+                <a href="/checkout" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow">
+                    Finalizar Compra
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+        <i class="fas fa-shopping-basket fa-4x text-muted mb-4"></i>
+        <h3>Seu carrinho está vazio</h3>
+        <p class="text-muted">Explore nossos produtos e encontre algo incrível para você!</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold">Ver Produtos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

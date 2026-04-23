@@ -192,10 +192,57 @@ def novo_endereco():
 
     return redirect(url_for('perfil'))
 
+@app.route('/carrinho/adicionar/<int:id>', methods=['POST'])
+def adicionar_carrinho(id):
+    quantidade = int(request.form.get('quantidade', 1))
+
+    # Inicializa o carrinho na sessão se não existir
+    if 'carrinho' not in session:
+        session['carrinho'] = {}
+
+    carrinho = session['carrinho']
+
+    # Se o produto já está lá, soma a quantidade; se não, cria
+    id_str = str(id)
+    if id_str in carrinho:
+        carrinho[id_str] += quantidade
+    else:
+        carrinho[id_str] = quantidade
+
+    session['carrinho'] = carrinho # Notifica o Flask da mudança
+    flash('Produto adicionado ao carrinho!', 'success')
+    return redirect(url_for('carrinho'))
+
 @app.route('/carrinho')
 def carrinho():
-    flash('Carrinho de compras em desenvolvimento', 'info')
-    return redirect(request.referrer or url_for('index'))
+    itens_carrinho = []
+    total_geral = 0
+
+    carrinho_session = session.get('carrinho', {})
+
+    # Buscamos os detalhes reais de cada produto no banco
+    for id_produto, qtd in carrinho_session.items():
+        produto = produto_repo.buscar_por_id(int(id_produto))
+        if produto:
+            subtotal = produto.preco * qtd
+            total_geral += subtotal
+            itens_carrinho.append({
+                'produto': produto,
+                'quantidade': qtd,
+                'subtotal': subtotal
+            })
+
+    return render_template('carrinho.html', itens=itens_carrinho, total=total_geral)
+
+@app.route('/carrinho/remover/<int:id>')
+def remover_item_carrinho(id):
+    carrinho = session.get('carrinho', {})
+    id_str = str(id)
+    if id_str in carrinho:
+        del carrinho[id_str]
+        session['carrinho'] = carrinho
+        flash('Item removido.', 'info')
+    return redirect(url_for('carrinho'))
 
 @app.route('/meus-pedidos')
 def meus_pedidos():
@@ -204,6 +251,13 @@ def meus_pedidos():
 
     flash('A página de pedidos em desenvolvimento', 'info')
     return redirect(url_for('perfil'))
+
+@app.context_processor
+def utility_processor():
+    def contagem_carrinho():
+        carrinho = session.get('carrinho', {})
+        return sum(carrinho.values()) # Soma todas as quantidades
+    return dict(total_itens=contagem_carrinho())
 
 if __name__ == '__main__':
     app.run(debug=True)
