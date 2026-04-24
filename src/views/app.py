@@ -6,10 +6,12 @@ from src.repository.endereco_repository import EnderecoRepository
 from src.repository.pedido_repository import PedidoRepository
 from src.repository.produto_repository import ProdutoRepository
 from src.services.venda_service import VendaService
-import os
-from werkzeug.utils import secure_filename
-
 from src.repository.usuario_repository import UsuarioRepository
+from src.models.produto_model import ProdutoModel
+import os
+
+from werkzeug.utils import secure_filename
+from functools import wraps
 
 # Define a pasta onde este arquivo está localizado
 BASE_DIR = Path(__file__).parent
@@ -17,6 +19,10 @@ BASE_DIR = Path(__file__).parent
 # Configura as pastas de templates e static
 template_dir = str(BASE_DIR/ "templates")
 static_dir = str(BASE_DIR/ "static")
+
+# Configuração para upload de produtos
+UPLOAD_PRODUTOS_DIR = os.path.join('src/views/static/uploads/produtos')
+os.makedirs(UPLOAD_PRODUTOS_DIR, exist_ok=True)
 
 app = Flask(__name__,
             template_folder=template_dir,
@@ -35,6 +41,139 @@ endereco_repo = EnderecoRepository()
 avaliacao_repo = AvaliacaoRepository()
 venda_service = VendaService()
 pedido_repo = PedidoRepository()
+
+
+# PROTEÇÃO DE ROTAS (DECORATOR PARA ADMIN)
+def admin_required(f):
+    @wraps(f)
+    def decorator_function(*args, **kwargs):
+        # Se não estiver logado ou o is_admin for falso/nulo, bloqueia
+        if 'usuario_id' not in session or not session.get('is_admin'):
+            flash('Acesso negado. Área restrita a administradores.', 'danger')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorator_function
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+@app.route('/admin/pedidos')
+@admin_required
+def admin_pedidos():
+    # Puxa todos os pedidos da loja
+    pedidos = pedido_repo.listar_todos()
+    return render_template('admin_pedidos.html', pedidos=pedidos)
+
+@app.route('/admin/pedidos/<int:pedido_id>/status', methods=['POST'])
+@admin_required
+def admin_alterar_status_pedido(pedido_id):
+    # Recebe o novo status que o admin escolheu no formulário
+    novo_status = request.form.get('status')
+
+    if novo_status in ['pendente', 'pago', 'enviado', 'entregue', 'cancelado']:
+        pedido_repo.mudar_status(pedido_id, novo_status)
+        flash(f'Estado do pedido #{pedido_id} alterado para {novo_status.upper()}.', 'success')
+    else:
+        flash('Estado inválido.', 'danger')
+
+    return redirect(url_for('admin_pedidos'))
+
+@app.route('/admin/produtos')
+@admin_required
+def admin_produtos():
+    produtos = produto_repo.listar_todos()
+    return render_template('admin_produtos.html', produtos=produtos)
+
+@app.route('/admin/produtos/novo', methods=['GET', 'POST'])
+@admin_required
+def admin_produto_novo():
+    if request.method == 'POST':
+        # 1. Tentar pegar o arquivo local
+        caminho_final_imagem = request.form.get('url_imagem')
+
+        if 'foto_local' in request.files:
+            arquivo = request.files['foto_local']
+            if arquivo.filename != '':
+                # Cria um nome seguro
+                sku = request.form.get('sku', 'sem_sku')
+                filename = secure_filename(f"prod_{sku}_{arquivo.filename}")
+                caminho_salvar = os.path.join(UPLOAD_PRODUTOS_DIR, filename)
+
+                # Guarda localmente
+                arquivo.save(caminho_salvar)
+
+                # Atualiza a variavel com o caminho relativo para a Base da Dados
+                caminho_final_imagem = f"/static/uploads/produtos/{filename}"
+
+        # 2. Criar o modelo
+        preco_str = request.form.get('preco')
+
+        # Criando o objeto com argumentos nomeados (mais seguro)
+        novo_p = ProdutoModel(
+            nome=request.form.get('nome'),
+            sku=request.form.get('sku'),
+            preco=float(preco_str) if preco_str else 0.0,
+            descricao=request.form.get('descricao'),
+            codigo_barras=request.form.get('codigo_barras'),
+            categoria=request.form.get('categoria'),
+            url_imagem=caminho_final_imagem
+            # criado_em e id ficam como None automaticamente
+        )
+
+        produto_repo.criar(novo_p)
+        flash('Produto cadastrado com sucesso!', 'success')
+        return redirect(url_for('admin_produtos'))
+
+    return render_template('admin_produtos_form.html', produto=None)
+
+@app.route('/admin/produtos/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def admin_produto_editar(id):
+    produto = produto_repo.buscar_por_id(id)
+    if request.method == 'POST':
+        produto.nome = request.form.get('nome')
+        produto.sku = request.form.get('sku')
+        preco_str = request.form.get('preco')
+        produto.preco = float(preco_str) if preco_str else 0.0
+        produto.descricao = request.form.get('descricao')
+        produto.codigo_barras = request.form.get('codigo_barras')
+        produto.categoria = request.form.get('categoria')
+        produto.url_imagem = request.form.get('url_imagem')
+
+        # --- LÓGICA DE UPLOAD NA EDIÇÃO ---
+        # Se ele preencheu o campo de URL, usamos isso
+        nova_url = request.form.get('url_imagem')
+        if nova_url:
+            produto.url_imagem = nova_url
+
+        # Se ele enviou um novo ficheiro, o ficheiro tem prioridade
+        if 'foto_local' in request.files:
+            arquivo = request.files['foto_local']
+            if arquivo.filename != '':
+                filename = secure_filename(f"prod_{produto.sku}_{arquivo.filename}")
+                caminho_salvar = os.path.join(UPLOAD_PRODUTOS_DIR, filename)
+                arquivo.save(caminho_salvar)
+                produto.url_imagem = f"/static/uploads/produtos/{filename}"
+
+        produto_repo.atualizar(id, produto)
+        flash('Produto atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_produtos'))
+
+    return render_template('admin_produtos_form.html', produto=produto)
+
+@app.route('/admin/produtos/excluir/<int:id>', methods=['POST'])
+@admin_required
+def admin_produto_excluir(id):
+    try:
+        produto_repo.deletar(id)
+        flash('Produto removido do catálogo.', 'success')
+    except Exception:
+        flash('Erro: Este produto possui pedidos vinculados e não pode ser removido.', 'danger')
+
+    return redirect(url_for('admin_produtos'))
+
 
 # CONCEITO: Camada de Apresentação (Início das Rotas ‘Web’)
 @app.route('/')
@@ -92,6 +231,7 @@ def login():
             # Supondo que a 'resposta' contenha os dados do usuário
             session['usuario_id'] = resposta['usuario']['id']
             session['usuario_nome'] = resposta['usuario']['nome']
+            session['is_admin'] = resposta['usuario']['is_admin']
 
             # Caso ainda não tenha upload de foto, usamos uma imagem padrão
             session['usuario_foto'] = "/static/img/usuarios/default-user.png"
@@ -284,7 +424,7 @@ def processar_pagamento(pedido_id):
     # -------------------------------------------------------------
 
     try:
-        pedido_repo.mudar_status(pedido_id, 'pago')
+        pedido_repo.mudar_status(pedido_id, 'em_analise')
         flash(f'Pagamento via {metodo} aprovado com sucesso! Obrigado pela sua compra!')
     except Exception as e:
         flash('Erro ao processar pagamento.', 'danger')

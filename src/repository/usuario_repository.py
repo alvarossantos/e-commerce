@@ -48,7 +48,7 @@ class UsuarioRepository:
                          Retorna None se nenhum usuário com esse email existir.
         """
         sql = """
-            SELECT id, nome, email, senha_hash, cpf, data_nascimento, telefone, criado_em, ativo
+            SELECT id, nome, email, senha_hash, cpf, data_nascimento, telefone, criado_em, ativo, is_admin
             FROM usuarios
             WHERE email = %s;
         """
@@ -68,6 +68,7 @@ class UsuarioRepository:
                     telefone=row[6],
                     criado_em=row[7],
                     ativo=row[8],
+                    is_admin=row[9]
                 )
             return None
 

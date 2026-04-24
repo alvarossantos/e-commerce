@@ -35,6 +35,11 @@
                                 <span>Olá, {{ session.usuario_nome.split(' ')[0] }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                {% if session.get('is_admin') %}
+                                <li><a class="dropdown-item fw-bold text-primary" href="/admin"><i class="fas fa-shield-alt me-2"></i> Painel Admin</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+
                                 <li><a class="dropdown-item" href="/perfil"><i class="fas fa-user-circle me-2"></i> Perfil</a></li>
                                 <li><a class="dropdown-item" href="/meus-pedidos"><i class="fas fa-box me-2"></i> Pedidos</a></li>
                                 <li><hr class="dropdown-divider"></li>

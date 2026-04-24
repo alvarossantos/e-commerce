@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h3 class="fw-bold mb-4">
+                    {{ 'Editar Produto' if produto else 'Cadastrar Novo Produto' }}
+                </h3>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-muted">Nome do Produto</label>
+                            <input type="text" name="nome" class="form-control" value="{{ produto.nome if produto else '' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Preço (R$)</label>
+                            <input type="number" step="0.01" name="preco" class="form-control" value="{{ produto.preco if produto else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Categoria</label>
+                            <select name="categoria" class="form-select">
+                                <option value="Hardware" {{ 'selected' if produto and produto.categoria == 'Hardware' }}>Hardware</option>
+                                <option value="Periféricos" {{ 'selected' if produto and produto.categoria == 'Periféricos' }}>Periféricos</option>
+                                <option value="Portáteis" {{ 'selected' if produto and produto.categoria == 'Portáteis' }}>Portáteis</option>
+                                <option value="Gamer" {{ 'selected' if produto and produto.categoria == 'Gamer' }}>Gamer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SKU / Modelo</label>
+                            <input type="text" name="sku" class="form-control" value="{{ produto.sku if produto else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">URL da Imagem (Link Externo)</label>
+                            <input type="text" name="url_imagem" class="form-control" value="{{ produto.url_imagem if produto else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ou carregar do computador</label>
+                            <input type="file" name="foto_local" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Descrição Completa</label>
+                            <textarea name="descricao" class="form-control" rows="4" required>{{ produto.descricao if produto else '' }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Código de Barras (EAN)</label>
+                            <input type="text" name="codigo_barras" class="form-control" value="{{ produto.codigo_barras if produto else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow">
+                            {{ 'Salvar Alterações' if produto else 'Cadastrar Produto' }}
+                        </button>
+                        <a href="/admin/produtos" class="btn btn-light btn-lg rounded-pill px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

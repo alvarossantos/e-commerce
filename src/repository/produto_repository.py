@@ -5,29 +5,24 @@ from src.models.produto_model import ProdutoModel
 class ProdutoRepository:
     def criar(self, produto: ProdutoModel, cursor_externo=None):
         """
-        Cria um novo produto no banco de dados.
-
-        Args:
-            produto (ProdutoModel): Objeto contendo todos os dados do produto a ser criado.
-                                   Deve incluir nome, sku, preco, descricao, codigo_barras e categoria.
-            cursor_externo (cursor, opcional): Cursor de banco de dados externo para uso em transações.
-                                              Se None, cria uma nova conexão.
-
-        Returns:
-            int: O 'ID' do novo produto gerado pelo banco de dados.
+        Cria um novo produto incluindo a URL ou caminho da imagem.
         """
+        # 1. Adicionamos 'url_imagem' tanto nas colunas quanto nos placeholders (%s)
         sql = """
-            INSERT INTO produtos (nome, sku, preco, descricao, codigo_barras, categoria)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO produtos (nome, sku, preco, descricao, codigo_barras, categoria, url_imagem)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
         """
+
+        # 2. Adicionamos 'produto.url_imagem' na tupla de parâmetros
         params = (
             produto.nome,
             produto.sku,
             produto.preco,
             produto.descricao,
             produto.codigo_barras,
-            produto.categoria
+            produto.categoria,
+            produto.url_imagem
         )
 
         with BancoDeDados() as cursor:
@@ -115,3 +110,21 @@ class ProdutoRepository:
 
             # Caso não encontre nada, retorna None
             return None
+
+    def atualizar(self, id, produto:ProdutoModel):
+        """Atualiza os dados de um produto existente."""
+        sql = """
+            UPDATE produtos
+            SET nome=%s, sku=%s, preco=%s, descricao=%s, codigo_barras=%s, categoria=%s, url_imagem=%s
+            WHERE id=%s; 
+        """
+        params = (produto.nome, produto.sku, produto.preco, produto.descricao,
+                  produto.codigo_barras, produto.categoria, produto.url_imagem, id)
+        with BancoDeDados() as cursor:
+            cursor.execute(sql, params)
+
+    def deletar(self, id):
+        """Remove um produto do catálogo"""
+        sql = "DELETE FROM produtos WHERE id = %s;"
+        with BancoDeDados() as cursor:
+            cursor.execute(sql, (id,))

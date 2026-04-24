@@ -1,5 +1,5 @@
 class ProdutoModel:
-    def __init__(self, nome, sku, preco, descricao, codigo_barras, categoria, url_imagem, criado_em, id=None):
+    def __init__(self, nome, sku, preco, descricao, codigo_barras, categoria, url_imagem, criado_em=None, id=None):
         self.id = id
         self.nome = nome
         self.sku = sku

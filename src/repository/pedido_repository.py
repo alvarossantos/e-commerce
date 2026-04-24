@@ -212,3 +212,18 @@ class PedidoRepository:
         with BancoDeDados() as cursor:
             cursor.execute(sql, (pedido_id,))
             return cursor.fetchall()
+
+    def listar_todos(self):
+        """
+        Busca todos os pedidos da loja para o Painel Administrativo.
+        Traz também o nome do cliente através de um JOIN.
+        """
+        sql = """
+            SELECT p.id, p.data_criacao, p.status, p.valor_total, u.nome
+            FROM pedidos p
+            JOIN usuarios u ON p.usuario_id = u.id
+            ORDER BY p.data_criacao DESC;
+        """
+        with BancoDeDados() as cursor:
+            cursor.execute(sql)
+            return cursor.fetchall()

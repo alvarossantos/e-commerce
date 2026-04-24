@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0"><i class="fas fa-boxes text-dark me-2"></i> Gestão de Pedidos</h3>
+            <p class="text-muted mb-0">Controlo de vendas e envios da loja.</p>
+        </div>
+        <a href="/admin" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i> Voltar ao Painel
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4 py-3">ID Pedido</th>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Valor Total</th>
+                        <th>Estado Atual</th>
+                        <th class="text-end pe-4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ped in pedidos %}
+                    <tr>
+                        <td class="ps-4 fw-bold">#{{ ped[0] }}</td>
+                        <td>{{ ped[4] }}</td>
+                        <td>{{ ped[1].strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="fw-bold text-primary">R$ {{ "%.2f"|format(ped[3]) }}</td>
+                        
+                        <td>
+                            {% if ped[2] == 'pendente' %}
+                                <span class="badge bg-warning text-dark px-2 py-1 rounded-pill"><i class="fas fa-clock me-1"></i> Pendente</span>
+                            {% elif ped[2] == 'em_analise' %}
+                                <span class="badge bg-info text-white px-2 py-1 rounded-pill"><i class="fas fa-search me-1"></i> Em Análise</span>
+                            {% elif ped[2] == 'pago' %}
+                                <span class="badge bg-success px-2 py-1 rounded-pill"><i class="fas fa-check me-1"></i> Pago</span>
+                            {% elif ped[2] == 'enviado' %}
+                                <span class="badge bg-primary px-2 py-1 rounded-pill"><i class="fas fa-truck me-1"></i> Enviado</span>
+                            {% elif ped[2] == 'entregue' %}
+                                <span class="badge bg-dark px-2 py-1 rounded-pill"><i class="fas fa-home me-1"></i> Entregue</span>
+                            {% else %}
+                                <span class="badge bg-danger px-2 py-1 rounded-pill">Cancelado</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <form action="/admin/pedidos/{{ ped[0] }}/status" method="POST" class="d-flex justify-content-end gap-2">
+                                <select name="status" class="form-select form-select-sm w-auto shadow-none border-secondary">
+                                    <option value="pendente" {% if ped[2] == 'pendente' %}selected{% endif %}>Pendente</option>
+                                    <option value="em_analise" {% if ped[2] == 'em_analise' %}selected{% endif %}>Em Análise</option>
+                                    <option value="pago" {% if ped[2] == 'pago' %}selected{% endif %}>Aprovar Pagamento</option>
+                                    <option value="enviado" {% if ped[2] == 'enviado' %}selected{% endif %}>Marcar como Enviado</option>
+                                    <option value="entregue" {% if ped[2] == 'entregue' %}selected{% endif %}>Confirmar Entrega</option>
+                                    <option value="cancelado" {% if ped[2] == 'cancelado' %}selected{% endif %}>Cancelar Pedido</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-dark px-3 fw-bold rounded-pill">Atualizar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3"></i><br>
+                            Nenhum pedido realizado até o momento.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

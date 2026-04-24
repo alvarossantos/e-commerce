@@ -53,7 +53,8 @@ class UsuarioController:
                 "mensagem": f"Bem-vindo, {usuario.nome}!",
                 "usuario": {
                     "id": usuario.id,
-                    "nome": usuario.nome
+                    "nome": usuario.nome,
+                    "is_admin": usuario.is_admin
                 }
             }, 200
         else:

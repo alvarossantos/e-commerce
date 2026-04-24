@@ -20,7 +20,8 @@ CREATE TABLE usuarios (
     telefone VARCHAR(15),                   -- Formatos como (11) 99999-9999
     url_foto TEXT DEFAULT '/static/img/usuarios/default.png',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de registro
-    ativo BOOLEAN DEFAULT TRUE               -- Define se o usuário pode logar
+    ativo BOOLEAN DEFAULT TRUE,               -- Define se o usuário pode logar
+    is_admin BOOLEAN DEFAULT FALSE
 );
 
 -- Tabela de Endereços: Armazena os endereços de cada usuário
@@ -76,7 +77,7 @@ CREATE TABLE pedidos (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     -- Status controlado por CHECK para integridade dos dados
     status VARCHAR(20) DEFAULT 'pendente'
-        CHECK (status IN ('pendente', 'pago', 'enviado', 'entregue', 'cancelado')),
+        CHECK (status IN ('pendente', 'em_analise', 'pago', 'enviado', 'entregue', 'cancelado')),
     valor_total DECIMAL(10, 2) DEFAULT 0.00, -- Valor total do pedido (soma dos itens)
     alertas_enviados INTEGER DEFAULT 0
     endereco_id INTEGER REFERENCES enderecos(id) ON DELETE SET NULL;
@@ -182,3 +183,7 @@ INSERT INTO estoque (produto_id, quantidade, estoque_minimo) VALUES
 -- Inserir um comentário de teste (assumindo que o produto 1 e usuario 1 existem)
 INSERT INTO avaliacoes (produto_id, usuario_id, nota, comentario)
 VALUES (1, 1, 5, 'Produto excelente! Chegou super rápido e a qualidade é incrível. Recomendo muito.');
+
+-- Tornando um usuario comum em Administrador
+-- (Substitua 'seu_email@email.com' pelo e-mail que você usa para logar)
+UPDATE usuarios SET is_admin = TRUE WHERE email = 'seu_email@email.com';

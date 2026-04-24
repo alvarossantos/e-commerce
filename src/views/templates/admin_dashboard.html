@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-shield-alt text-primary me-2"></i> Painel de Controle</h2>
+            <p class="text-muted mt-1 mb-0">Visão geral e gestão da Álvaro Store.</p>
+        </div>
+        <a href="/" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-external-link-alt me-2"></i> Ver Loja
+        </a>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white overflow-hidden" style="position: relative;">
+                <i class="fas fa-box-open fa-6x position-absolute" style="opacity: 0.1; right: -10px; bottom: -20px;"></i>
+                <div class="card-body p-4 position-relative z-1">
+                    <h4 class="fw-bold mb-3">Produtos e Estoque</h4>
+                    <p class="mb-4">Adicione novos itens, edite preços, altere fotos e controle o inventário.</p>
+                    <a href="/admin/produtos" class="btn btn-light text-primary fw-bold rounded-pill px-4 shadow-sm">
+                        Gerir Produtos <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark text-white overflow-hidden" style="position: relative;">
+                <i class="fas fa-shopping-bag fa-6x position-absolute" style="opacity: 0.1; right: -10px; bottom: -20px;"></i>
+                <div class="card-body p-4 position-relative z-1">
+                    <h4 class="fw-bold mb-3">Vendas e Entregas</h4>
+                    <p class="mb-4">Acompanhe os pedidos realizados, aprove pagamentos e efetue despachos.</p>
+                    <a href="/admin/pedidos" class="btn btn-primary fw-bold rounded-pill px-4 shadow-sm">
+                        Gerir Pedidos <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
