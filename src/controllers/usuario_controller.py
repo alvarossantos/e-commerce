@@ -1,8 +1,10 @@
-# =========================================================================
-# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS (Business Layer)
-# Responsabilidade: Orquestrar as regras de negócio, realizar validações
-# (ex: verificar senhas, formatar dados) antes de enviar para a camada de Dados.
-# =========================================================================
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / APLICAÇÃO (Business Layer)
+# Papel do Controller: Atua como o "maestro" do sistema. Ele recebe as requisições
+# enviadas pela Camada de Apresentação (Views), processa as regras de negócio orquestrando
+# as Models e os Services, e decide o que será enviado para a Camada de Dados (Repository).
+# Essa separação garante que a regra de negócio não fique misturada com o HTML ou com o SQL.
+# ========================================================================================
 
 from src.models.usuario_model import UsuarioModel
 from src.repository.usuario_repository import UsuarioRepository

@@ -1,3 +1,12 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / DOMÍNIO (Business Layer)
+# Papel da Model: Representa as entidades centrais e as regras estritas do negócio.
+# É aqui que ocorrem as validações puras (ex: verificar se um CPF é válido ou se o
+# preço é negativo). A Model é "cega" em relação ao banco de dados e à interface web;
+# ela apenas garante a integridade da informação antes de ser persistida.
+# ========================================================================================
+
+
 class EstoqueModel:
     def __init__(self, produto_id, quantidade, estoque_minimo, ultima_atualizacao=None):
         self.produto_id = produto_id

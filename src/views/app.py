@@ -1,9 +1,11 @@
-# =========================================================================
+# ========================================================================================
 # CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE APRESENTAÇÃO (Presentation Layer)
-# Responsabilidade: Interagir com o usuário, receber requisições HTTP,
-# renderizar páginas HTML (Jinja2) e repassar ações para a camada de Negócios.
-# A camada de apresentação NÃO acessa o banco de dados diretamente.
-# =========================================================================
+# Papel do App/Views: Responsável exclusivamente por interagir com o usuário final (Client).
+# Ele define as rotas HTTP, captura os dados de formulários web, gerencia as sessões de
+# login e renderiza as telas HTML via Jinja2. Esta camada delega TODA a lógica pesada
+# para os Controllers e NÃO se comunica diretamente com o banco de dados.
+# ========================================================================================
+
 
 from src.controllers.usuario_controller import UsuarioController
 from src.repository.avaliacao_repository import AvaliacaoRepository

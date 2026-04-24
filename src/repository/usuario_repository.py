@@ -1,3 +1,12 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE ACESSO A DADOS (Data Access Layer)
+# Papel do Repository: Isolar e centralizar toda a comunicação física com o banco de dados.
+# Esta é a ÚNICA camada do sistema autorizada a conter código SQL (INSERT, SELECT, etc.)
+# e a interagir com a biblioteca psycopg2. Isso permite que, se mudarmos o banco de dados
+# no futuro (ex: para MySQL), apenas esta pasta precisará ser alterada.
+# ========================================================================================
+
+
 from src.database.conexao import BancoDeDados
 from src.models.usuario_model import UsuarioModel
 

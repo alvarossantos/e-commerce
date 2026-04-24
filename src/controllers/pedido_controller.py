@@ -1,3 +1,11 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / APLICAÇÃO (Business Layer)
+# Papel do Controller: Atua como o "maestro" do sistema. Ele recebe as requisições
+# enviadas pela Camada de Apresentação (Views), processa as regras de negócio orquestrando
+# as Models e os Services, e decide o que será enviado para a Camada de Dados (Repository).
+# Essa separação garante que a regra de negócio não fique misturada com o HTML ou com o SQL.
+# ========================================================================================
+
 from src.repository.pedido_repository import PedidoRepository
 from src.repository.produto_repository import ProdutoRepository
 from src.models.produto_model import ProdutoModel
@@ -7,20 +15,34 @@ class PedidoController:
     def __init__(self):
         self.pedido_repo = PedidoRepository()
         self.produto_repo = ProdutoRepository()
-        self.produto_db = ProdutoModel()
 
-    def finalizar_venda(self, usuario_id, itens_do_carrinho):
-        id_pedido = self.pedido_repo.criar(usuario_id)
+    def finalizar_venda(self, usuario_id, endereco_id, carrinho):
+        """
+        Orquestra a finalização da venda.
+        Calcula o total consultando o banco (para evitar fraudes) e delega a gravação.
+        """
+        # 1. Calcular o valor total com os preços reais do banco
+        valor_total = 0
+        for produto_id_str, qtd in carrinho.items():
+            produto_atual = self.produto_repo.buscar_por_id(int(produto_id_str))
+            if produto_atual:
+                valor_total += produto_atual.preco * qtd
 
-        for item in itens_do_carrinho:
-            # Buscamos o preço MAIS ATUAL do banco no momento do fechamento
-            produto_atual = self.produto_repo.buscar_por_id(item['produto_id'])
-            preco_no_fechamento = produto_atual.preco
+        # 2. Chama a função real do repositório, passando todas as informações que ele exige
+        id_pedido = self.pedido_repo.criar_pedido(
+            usuario_id=usuario_id,
+            endereco_id=endereco_id,
+            valor_total=valor_total,
+            carrinho=carrinho,
+            produto_repo=self.produto_repo
+        )
 
-            # Gravamos o preço que buscamos AGORA, não o que estava no carrinho antes
-            self.pedido_repo.inserir_item(id_pedido, item['produto_id'], item['qtd'], preco_no_fechamento)
+        return id_pedido
 
     def validar_e_finalizar(self, usuario_id, itens_vinda_da_tela):
+        """
+        Regra de Negócio: Verifica se o preço mudou enquanto o cliente estava no checkout.
+        """
         itens_com_preco_alterado = []
 
         for item in itens_vinda_da_tela:
@@ -42,6 +64,8 @@ class PedidoController:
                 "status": "aviso",
                 "mensagem": "Alguns preços mudaram desde que você adicionou ao carrinho.",
                 "alteracoes": itens_com_preco_alterado
-            }, 409 # Status de conflito
+            }, 409  # Status de conflito HTTP
 
-        # 4. Se não houver alteração, segue para a criação do pedido...
+        # 4. Se não houver alteração, o sistema seguiria para finalizar a venda
+        # (Lógica simplificada para a validação)
+        return {"status": "sucesso", "mensagem": "Preços validados."}, 200

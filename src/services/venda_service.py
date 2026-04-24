@@ -1,3 +1,12 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / SERVIÇOS (Business Layer)
+# Papel do Service: Encapsular lógicas complexas que envolvem mais de uma entidade ou
+# que se comunicam com sistemas externos (ex: envio de e-mails, gateways de pagamento,
+# transações de estoque). O Service consome os Repositories para executar operações de
+# forma atômica, garantindo o padrão "Service Layer".
+# ========================================================================================
+
+
 from src.repository.pedido_repository import PedidoRepository
 from src.repository.produto_repository import ProdutoRepository
 from src.services.email_service import EmailService

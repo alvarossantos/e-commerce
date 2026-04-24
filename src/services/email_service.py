@@ -1,3 +1,11 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / SERVIÇOS (Business Layer)
+# Papel do Service: Encapsular lógicas complexas que envolvem mais de uma entidade ou
+# que se comunicam com sistemas externos (ex: envio de e-mails, gateways de pagamento,
+# transações de estoque). O Service consome os Repositories para executar operações de
+# forma atômica, garantindo o padrão "Service Layer".
+# ========================================================================================
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart

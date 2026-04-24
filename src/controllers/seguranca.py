@@ -1,3 +1,11 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / APLICAÇÃO (Business Layer)
+# Papel do Controller: Atua como o "maestro" do sistema. Ele recebe as requisições
+# enviadas pela Camada de Apresentação (Views), processa as regras de negócio orquestrando
+# as Models e os Services, e decide o que será enviado para a Camada de Dados (Repository).
+# Essa separação garante que a regra de negócio não fique misturada com o HTML ou com o SQL.
+# ========================================================================================
+
 import bcrypt
 
 

@@ -1,3 +1,12 @@
+# ========================================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS / DOMÍNIO (Business Layer)
+# Papel da Model: Representa as entidades centrais e as regras estritas do negócio.
+# É aqui que ocorrem as validações puras (ex: verificar se um CPF é válido ou se o
+# preço é negativo). A Model é "cega" em relação ao banco de dados e à interface web;
+# ela apenas garante a integridade da informação antes de ser persistida.
+# ========================================================================================
+
+
 import re
 from datetime import datetime
 
