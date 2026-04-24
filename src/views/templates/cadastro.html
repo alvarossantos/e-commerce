@@ -12,6 +12,7 @@
                 </div>
 
                 <form action="{{ url_for('cadastro') }}" method="POST" class="needs-validation">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="nome" class="form-label fw-semibold">Nome Completo</label>
                         <input type="text" class="form-control form-control-lg bg-light border-0" id="nome" name="nome" placeholder="Ex: Álvaro Santos" required>

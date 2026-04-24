@@ -47,6 +47,7 @@
 
                         <div class="tab-pane fade" id="cartao" role="tabpanel">
                             <form action="{{ url_for('processar_pagamento', pedido_id=pedido[0]) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="metodo_pagamento" value="Cartão de Crédito">
                                 
                                 <div class="mb-3">

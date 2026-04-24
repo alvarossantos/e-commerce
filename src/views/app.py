@@ -1,5 +1,5 @@
-from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_wtf import csrf
+
 from src.controllers.usuario_controller import UsuarioController
 from src.repository.avaliacao_repository import AvaliacaoRepository
 from src.repository.endereco_repository import EnderecoRepository
@@ -8,8 +8,11 @@ from src.repository.produto_repository import ProdutoRepository
 from src.services.venda_service import VendaService
 from src.repository.usuario_repository import UsuarioRepository
 from src.models.produto_model import ProdutoModel
-import os
 
+from pathlib import Path
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_wtf.csrf import CSRFProtect
+import os
 from werkzeug.utils import secure_filename
 from functools import wraps
 
@@ -32,6 +35,7 @@ app = Flask(__name__,
 print(f"Buscando templates em: {template_dir}")
 
 app.secret_key = 'sua_chave_secreta_aqui' # Necessário para mensagens de erro/sucesso
+csrf = CSRFProtect(app)
 
 # Instanciando seus componentes existentes
 produto_repo = ProdutoRepository()

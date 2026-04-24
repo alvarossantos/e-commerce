@@ -12,6 +12,7 @@
                 </div>
 
                 <form action="{{ url_for('login') }}" method="POST" class="needs-validation">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-4">
                         <label for="email" class="form-label fw-semibold">E-mail</label>
                         <div class="input-group">

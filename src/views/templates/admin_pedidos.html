@@ -52,6 +52,7 @@
 
                         <td class="text-end pe-4">
                             <form action="/admin/pedidos/{{ ped[0] }}/status" method="POST" class="d-flex justify-content-end gap-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <select name="status" class="form-select form-select-sm w-auto shadow-none border-secondary">
                                     <option value="pendente" {% if ped[2] == 'pendente' %}selected{% endif %}>Pendente</option>
                                     <option value="em_analise" {% if ped[2] == 'em_analise' %}selected{% endif %}>Em Análise</option>
