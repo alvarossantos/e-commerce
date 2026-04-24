@@ -1,3 +1,9 @@
+# =========================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE ACESSO A DADOS (Data Layer)
+# Responsabilidade: Isolar o código SQL do resto da aplicação. É a única
+# camada que se comunica diretamente com o PostgreSQL através do psycopg2.
+# =========================================================================
+
 from src.database.conexao import BancoDeDados
 from src.models.produto_model import ProdutoModel
 

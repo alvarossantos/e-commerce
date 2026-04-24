@@ -1,3 +1,9 @@
+# =========================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE NEGÓCIOS (Business Layer)
+# Responsabilidade: Orquestrar as regras de negócio, realizar validações
+# (ex: verificar senhas, formatar dados) antes de enviar para a camada de Dados.
+# =========================================================================
+
 from src.models.usuario_model import UsuarioModel
 from src.repository.usuario_repository import UsuarioRepository
 from src.controllers.seguranca import Seguranca

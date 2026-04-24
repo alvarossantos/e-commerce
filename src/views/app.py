@@ -1,4 +1,9 @@
-from flask_wtf import csrf
+# =========================================================================
+# CONCEITO DE ARQUITETURA LÓGICA: CAMADA DE APRESENTAÇÃO (Presentation Layer)
+# Responsabilidade: Interagir com o usuário, receber requisições HTTP,
+# renderizar páginas HTML (Jinja2) e repassar ações para a camada de Negócios.
+# A camada de apresentação NÃO acessa o banco de dados diretamente.
+# =========================================================================
 
 from src.controllers.usuario_controller import UsuarioController
 from src.repository.avaliacao_repository import AvaliacaoRepository
