@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold"><i class="fas fa-lock text-success me-2"></i> Finalização Segura</h2>
+        <p class="text-muted">Falta pouco para os seus produtos serem seus!</p>
+    </div>
+
+    <form action="{{ url_for('checkout') }}" method="POST">
+        <div class="row">
+            
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h4 class="fw-bold mb-4">1. Escolha o Endereço de Entrega</h4>
+                    
+                    {% if enderecos %}
+                        <div class="row g-3">
+                            {% for end in enderecos %}
+                            <div class="col-md-6">
+                                <label class="w-100 position-relative">
+                                    <input type="radio" name="endereco_id" value="{{ end[0] }}" class="form-check-input position-absolute" style="top: 15px; right: 15px; z-index: 2;" required {% if loop.first %}checked{% endif %}>
+                                    <div class="card card-endereco border-1 rounded-3 p-3 cursor-pointer h-100">
+                                        <h6 class="fw-bold mb-1"><i class="fas fa-map-marker-alt text-primary me-2"></i> Endereço {{ loop.index }}</h6>
+                                        <p class="small text-muted mb-0 mt-2">
+                                            {{ end[2] }}, {{ end[3] }}<br>
+                                            {{ end[4] }} - {{ end[5] }}/{{ end[6] }}<br>
+                                            CEP: {{ end[7] }}
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning rounded-3 border-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Você ainda não tem endereços cadastrados.
+                            <a href="/perfil" class="alert-link">Vá ao seu Perfil para adicionar um.</a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow rounded-4 p-4 sticky-top" style="top: 100px;">
+                    <h5 class="fw-bold mb-4">Resumo do Pedido</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Itens ({{ total_itens }})</span>
+                        <span>R$ {{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Frete</span>
+                        <span class="text-success fw-bold">Grátis</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-4 fw-bold">Total</span>
+                        <span class="fs-4 fw-bold text-primary">R$ {{ "%.2f"|format(total) }}</span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow" {% if not enderecos %}disabled{% endif %}>
+                        <i class="fas fa-check-circle me-2"></i> Confirmar Pedido
+                    </button>
+                    
+                    <p class="text-center small text-muted mt-3 mb-0">
+                        <i class="fas fa-shield-alt me-1"></i> Ambiente 100% seguro
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<style>
+    .card-endereco { transition: all 0.2s; cursor: pointer; }
+    input[type="radio"]:checked + .card-endereco {
+        border-color: #0d6efd !important;
+        background-color: #f8fbff;
+        box-shadow: 0 0 0 0.1rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+{% endblock %}

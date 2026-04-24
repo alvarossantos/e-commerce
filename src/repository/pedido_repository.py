@@ -2,23 +2,39 @@ from src.database.conexao import BancoDeDados
 
 
 class PedidoRepository:
-    def criar(self, usuario_id: int) -> int:
+    def criar_pedido(self, usuario_id, endereco_id, valor_total, carrinho,produto_repo):
         """
-        Cria o cabeçalho de um novo pedido para um usuário.
-        O status inicial é sempre 'pendente' e o valor 0.00.
-
-        Args:
-            usuario_id (int): O 'ID' do cliente realizando a compra.
-
-        Returns:
-            int: O 'ID' do novo pedido gerado pelo banco de dados.
+        Cria um pedido completo (cabeçalho e itens) em uma única transação.
+        Isso garante que, se houver erro ao salvar um item, o pedido não seja criado.
         """
-        # Cria o pedido inicial (cabeçalho)
+        # Query 1: Cria o cabeçalho do pedido
         # Simplificado: status 'pendente' e o valor 0 são automáticos
-        sql = "INSERT INTO pedidos (usuario_id) VALUES (%s) RETURNING id;"
+        sql_pedido = """
+            INSERT INTO pedidos (usuario_id, endereco_id, valor_total)
+            VALUES (%s, %s, %s)
+            RETURNING id; 
+        """
+
+        # Query 2: Insere os itens vinculados ao pedido
+        sql_item = """
+            INSERT INTO itens_pedido (pedido_id, produto_id, quantidade,preco_unitario)
+            VALUES (%s, %s, %s, %s);
+        """
+
         with BancoDeDados() as cursor:
-            cursor.execute(sql, (usuario_id,))
-            return cursor.fetchone()[0]
+            # 1. Executa a criação do pedido e recupera o ID gerado
+            cursor.execute(sql_pedido, (usuario_id, endereco_id, valor_total))
+            pedido_id = cursor.fetchone()[0]
+
+            # 2. Percorre o carrinho para inserir cada item
+            for produto_id_str, quantidade in carrinho.items():
+                produto_id = int(produto_id_str)
+                # Buscamos o preço real do produto para evitar fraude no frontend
+                produto = produto_repo.buscar_por_id(produto_id)
+
+                cursor.execute(sql_item, (pedido_id, produto_id, quantidade, produto.preco))
+
+            return pedido_id
 
     def inserir_item(self, pedido_id, produto_id, quantidade, preco_unitario):
         """
@@ -168,3 +184,31 @@ class PedidoRepository:
         sql = "UPDATE pedidos SET alertas_enviados = alertas_enviados + 1 WHERE id = %s;"
         with BancoDeDados() as cursor:
             cursor.execute(sql , (pedido_id,))
+
+    def listar_por_usuario(self, usuario_id):
+        """
+        Busca todos os cabeçalhos de pedido de um usuário específico.
+        """
+        sql = """
+            SELECT id, data_criacao, status, valor_total
+            FROM pedidos
+            WHERE usuario_id = %s
+            ORDER BY data_criacao DESC;
+        """
+        with BancoDeDados() as cursor:
+            cursor.execute(sql, (usuario_id,))
+            return cursor.fetchall()
+
+    def listar_itens_por_pedido(self, pedido_id):
+        """
+        Busca os itens de um pedido, trazendo o nome e a foto do produto (JOIN)
+        """
+        sql = """
+            SELECT p.id, p.nome, p.url_imagem, ip.quantidade, ip.preco_unitario
+            FROM itens_pedido ip
+            JOIN produtos p ON ip.produto_id = p.id
+            WHERE ip.pedido_id = %s;
+        """
+        with BancoDeDados() as cursor:
+            cursor.execute(sql, (pedido_id,))
+            return cursor.fetchall()

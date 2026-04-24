@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            
+            <div class="text-center mb-4">
+                <i class="fas fa-lock fa-2x text-success mb-2"></i>
+                <h3 class="fw-bold">Pagamento Seguro</h3>
+                <p class="text-muted">Pedido #{{ pedido[0] }} • Total: <span class="fw-bold text-primary">R$ {{ "%.2f"|format(pedido[3]) }}</span></p>
+            </div>
+
+            <div class="card border-0 shadow rounded-4 overflow-hidden">
+                <div class="card-header bg-white p-0 border-bottom">
+                    <ul class="nav nav-tabs nav-justified" id="pagamentoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold py-3 text-dark border-0" id="pix-tab" data-bs-toggle="tab" data-bs-target="#pix" type="button" role="tab">
+                                <i class="fab fa-pix text-success me-1"></i> PIX
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold py-3 text-dark border-0" id="cartao-tab" data-bs-toggle="tab" data-bs-target="#cartao" type="button" role="tab">
+                                <i class="fas fa-credit-card text-primary me-1"></i> Cartão
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="tab-content" id="pagamentoTabsContent">
+                        
+                        <div class="tab-pane fade show active text-center" id="pix" role="tabpanel">
+                            <h5 class="fw-bold mb-3">Escaneie o QR Code</h5>
+                            <div class="bg-light p-3 rounded-4 d-inline-block mb-4 border">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SimulacaoDePagamentoPIX" alt="QR Code PIX">
+                            </div>
+                            <p class="small text-muted mb-4">Aprovação instantânea. Use o aplicativo do seu banco para ler o código acima.</p>
+                            
+                            <form action="{{ url_for('processar_pagamento', pedido_id=pedido[0]) }}" method="POST">
+                                <input type="hidden" name="metodo_pagamento" value="PIX">
+                                <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold btn-lg">
+                                    Simular Pagamento PIX
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="cartao" role="tabpanel">
+                            <form action="{{ url_for('processar_pagamento', pedido_id=pedido[0]) }}" method="POST">
+                                <input type="hidden" name="metodo_pagamento" value="Cartão de Crédito">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Número do Cartão</label>
+                                    <input type="text" class="form-control" placeholder="0000 0000 0000 0000" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Nome do Titular (Como impresso no cartão)</label>
+                                    <input type="text" class="form-control" placeholder="Álvaro Santos" required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-6 mb-4">
+                                        <label class="form-label small fw-bold text-muted">Validade</label>
+                                        <input type="text" class="form-control" placeholder="MM/AA" required>
+                                    </div>
+                                    <div class="col-6 mb-4">
+                                        <label class="form-label small fw-bold text-muted">CVV</label>
+                                        <input type="text" class="form-control" placeholder="123" required>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold btn-lg shadow-sm">
+                                    Pagar R$ {{ "%.2f"|format(pedido[3]) }}
+                                </button>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="/meus-pedidos" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Voltar aos pedidos</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilo para a aba ativa ficar destacada */
+    .nav-tabs .nav-link.active {
+        border-bottom: 3px solid #0d6efd !important;
+        color: #0d6efd !important;
+        background-color: transparent;
+    }
+</style>
+{% endblock %}

@@ -10,14 +10,17 @@
         </ol>
     </nav>
 
-    <div class="row gx-5">
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <img src="https://via.placeholder.com/600x600?text={{ produto.nome|urlencode }}" class="img-fluid w-100" alt="{{ produto.nome }}">
+    <div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-12 col-md-6 mb-4 mb-md-0 text-center">
+                <img src="{{ produto.url_imagem if produto.url_imagem else '/static/img/produtos/placeholder.png' }}"
+                     class="img-fluid rounded-4 shadow-sm bg-white p-4"
+                     alt="Imagem de {{ produto.nome }}"
+                     style="width: 100%; max-height: 450px; object-fit: contain;">
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <span class="badge bg-primary mb-2 px-3 py-2 rounded-pill">{{ produto.categoria }}</span>
             <h1 class="display-5 fw-bold mb-3">{{ produto.nome }}</h1>
 
@@ -34,7 +37,7 @@
 
             <hr class="my-4">
 
-            <form action="#" method="POST" class="d-flex align-items-center gap-3">
+            <form action="{{ url_for('adicionar_carrinho', id=produto.id) }}" method="POST" class="d-flex align-items-center gap-3">
                 <div class="input-group" style="width: 130px;">
                     <button class="btn btn-outline-secondary" type="button" id="btn-minus">-</button>
                     <input type="number" class="form-control text-center" value="1" min="1" max="10" name="quantidade">

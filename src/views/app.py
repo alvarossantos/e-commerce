@@ -3,7 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from src.controllers.usuario_controller import UsuarioController
 from src.repository.avaliacao_repository import AvaliacaoRepository
 from src.repository.endereco_repository import EnderecoRepository
+from src.repository.pedido_repository import PedidoRepository
 from src.repository.produto_repository import ProdutoRepository
+from src.services.venda_service import VendaService
 import os
 from werkzeug.utils import secure_filename
 
@@ -31,13 +33,20 @@ usuario_ctrl = UsuarioController()
 usuario_repo = UsuarioRepository()
 endereco_repo = EnderecoRepository()
 avaliacao_repo = AvaliacaoRepository()
+venda_service = VendaService()
+pedido_repo = PedidoRepository()
 
 # CONCEITO: Camada de Apresentação (Início das Rotas ‘Web’)
 @app.route('/')
 def index():
-    # Busca produtos do seu banco de dados real
-    produtos = produto_repo.listar_todos()
-    return render_template('index.html', produtos=produtos)
+    # Captura os dados da Query String (ex: /?busca=mouse&categoria=Hardware)
+    busca = request.args.get('busca')
+    categoria = request.args.get('categoria')
+
+    # Chama a nossa função flexível
+    produtos = produto_repo.listar_todos(busca=busca, categoria=categoria)
+
+    return render_template('index.html', produtos=produtos, busca=busca, categoria=categoria)
 
 @app.route('/produto/<int:id>')
 def detalhes_produto(id):
@@ -244,13 +253,125 @@ def remover_item_carrinho(id):
         flash('Item removido.', 'info')
     return redirect(url_for('carrinho'))
 
-@app.route('/meus-pedidos')
-def meus_pedidos():
+@app.route('/pagamento/<int:pedido_id>')
+def pagamento(pedido_id):
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
 
-    flash('A página de pedidos em desenvolvimento', 'info')
-    return redirect(url_for('perfil'))
+    # Reutilizamos a busca de pedidos do usuário para garantir que ele só pague os dele
+    pedidos = pedido_repo.listar_por_usuario(session['usuario_id'])
+    pedido_atual = next((p for p in pedidos if p[0] == pedido_id), None)
+
+    # Se o pedido não for dele, não existir ou já estiver pago, bloqueia
+    if not pedido_atual or pedido_atual[2] != 'pendente':
+        flash('Pedido inválido ou já pago.', 'warning')
+        return redirect(url_for('meus_pedidos'))
+
+    # Passamos os dados do pedido (id, data, status, valor) para o HTML
+    return render_template('pagamento.html', pedido=pedido_atual)
+
+@app.route('/pagamento/processar/<int:pedido_id>', methods=['POST'])
+def processar_pagamento(pedido_id):
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    metodo = request.form.get('metodo_pagamento', 'N/A')
+
+    # -------------------------------------------------------------
+    # É AQUI QUE A MÁGICA (SIMULAÇÃO) ACONTECE!
+    # Numa aplicação real, enviaríamos os dados do cartão para a API aqui.
+    # Como é simulação, apenas assumimos sucesso imediato e mudamos o status.
+    # -------------------------------------------------------------
+
+    try:
+        pedido_repo.mudar_status(pedido_id, 'pago')
+        flash(f'Pagamento via {metodo} aprovado com sucesso! Obrigado pela sua compra!')
+    except Exception as e:
+        flash('Erro ao processar pagamento.', 'danger')
+
+    return redirect(url_for('meus_pedidos'))
+
+@app.route('/meus-pedidos')
+def meus_pedidos():
+    # Proteção: Só logados entram
+    if 'usuario_id' not in session:
+        flash('Faça login para ver seu histórico de pedidos.', 'warning')
+        return redirect(url_for('login'))
+
+    usuario_id = session['usuario_id']
+
+    # Busca os pedidos "crus" do banco de dados
+    pedidos_brutos = pedido_repo.listar_por_usuario(usuario_id)
+
+    # Monntar uma lista limpa e organizada
+    pedidos_completos = []
+
+    if pedidos_brutos:
+        for ped in pedidos_brutos:
+            # Para cada pedido, busca os produtos que estão dentro dele
+            itens = pedido_repo.listar_itens_por_pedido(ped[0])
+
+            pedidos_completos.append({
+                'id': ped[0],
+                'data': ped[1],
+                'status': ped[2],
+                'total': ped[3],
+                'itens': itens
+            })
+
+    return render_template('meus_pedidos.html', pedidos=pedidos_completos)
+
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    # 1. Proteção: Só logados entram
+    if 'usuario_id' not in session:
+        flash('Faça login para finalizar a compra.', 'warning')
+        return redirect(url_for('login'))
+
+    carrinho = session.get('carrinho', {})
+
+    # 2. Proteção: Carrinho vazio não finaliza
+    if not carrinho:
+        flash('Seu carrinho está vazio.', 'warning')
+        return redirect(url_for('carrinho'))
+
+    # Se o utilizador clicou em "Confirmar Pedido" (POST)
+    if request.method == 'POST':
+        endereco_id = request.form.get('endereco_id')
+
+        if not endereco_id:
+            flash('Por favor, selecione um endereço de entrega.', 'danger')
+            return redirect(url_for('checkout'))
+
+        try:
+            # Aqui chamamos o seu Service Pattern para orquestrar a venda no banco de dados!
+            # Ele deve receber o ID do cliente, o dicionário do carrinho e o ID do endereço
+            venda_service.realizar_venda(session['usuario_id'], carrinho, endereco_id)
+
+            # Esvazia o carrinho da sessão após o sucesso
+            session.pop('carrinho', None)
+
+            flash('🎉 Pedido realizado com sucesso! Verifique seus pedidos.', 'success')
+            return redirect(url_for('meus_pedidos'))
+
+        except Exception as e:
+            # Se algo falhar (ex: falta de estoque), o banco de dados faz o ROLLBACK automático
+            print(f"Erro no checkout: {e}")
+            flash(f'Erro ao processar o pedido: {str(e)}', 'danger')
+            return redirect(url_for('checkout'))
+
+    # Se for apenas para visualizar a página (GET)
+    enderecos = endereco_repo.listar_por_usuario(session['usuario_id'])
+
+    # Calcula o total para exibir na tela
+    total = 0
+    for id_produto, qtd in carrinho.items():
+        produto = produto_repo.buscar_por_id(int(id_produto))
+        if produto:
+            total += produto.preco * qtd
+
+    return render_template('checkout.html', enderecos=enderecos, total=total)
 
 @app.context_processor
 def utility_processor():

@@ -35,58 +35,36 @@ class ProdutoRepository:
             novo_id = cursor.fetchone()
             return novo_id[0]
 
-    def listar_todos(self):
+    def listar_todos(self, busca=None, categoria=None):
         """
-        Lista todos os produtos cadastrados no banco de dados, ordenados por data de criação (mais recente primeiro).
-
-        Returns:
-            list of ProdutoModel: Lista contendo todos os produtos encontrados.
-                                 Retorna lista vazia se nenhum produto estiver cadastrado.
+        Lista todos os produtos, permitindo filtrar por termo de busca ou categoria.
         """
+        # Começamos com a base da consulta. O "WHERE 1=1" facilita a concatenação de filtros
         sql = """
             SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, url_imagem, id
             FROM produtos 
-            ORDER BY criado_em DESC;
+            WHERE 1=1
         """
+        params = []
+
+        # Se houver termo de busca, adicionamos o filtro ILIKE (insensível a maiusculas/minusculas)
+        if busca:
+            sql += " AND (nome ILIKE %s OR descricao ILIKE %s)"
+            params.append(f"%{busca}%")
+            params.append(f"%{busca}%")
+
+        # Se houver categoria, adicionamos o filtro exato
+        if categoria:
+            sql += " AND categoria = %s"
+            params.append(categoria)
+
+        sql += " ORDER BY criado_em DESC;"
+
         produtos = []
         with BancoDeDados() as cursor:
-            cursor.execute(sql)
+            cursor.execute(sql, tuple(params))
             rows = cursor.fetchall()
             for row in rows:
-                produtos.append(ProdutoModel(
-                    nome=row[0],
-                    sku=row[1],
-                    preco=row[2],
-                    descricao=row[3],
-                    codigo_barras=row[4],
-                    categoria=row[5],
-                    criado_em=row[6],
-                    url_imagem=row[7],
-                    id=row[8]
-                ))
-        return produtos
-
-    def buscar_por_categoria(self, categoria):
-        """
-        Busca todos os produtos pertencentes a uma determinada categoria.
-
-        Args:
-            categoria (str): Nome da categoria a ser filtrada.
-
-        Returns:
-            list of ProdutoModel: Lista de produtos que pertencem à categoria especificada.
-                                 Retorna lista vazia se nenhum produto for encontrado.
-        """
-        sql = """
-            SELECT nome, sku, preco, descricao, codigo_barras, categoria, criado_em, url_imagem, id
-            FROM produtos
-            WHERE categoria = %s;
-        """
-        produtos = []
-        with BancoDeDados() as cursor:
-            cursor.execute(sql, (categoria,))
-            rows = cursor.fetchall()
-            for row in  rows:
                 produtos.append(ProdutoModel(
                     nome=row[0],
                     sku=row[1],

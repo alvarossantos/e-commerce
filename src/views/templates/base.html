@@ -12,41 +12,47 @@
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">🛒 ÁLVARO STORE</a>
+            <a class="navbar-brand fw-bold" href="/">🛒 ÁLVARO STORE</a>
 
-            <div class="d-flex border rounded p-1 bg-white mx-auto" style="min-width: 300px;">
-                <input class="form-control border-0" type="search" placeholder="O que você procura?">
-                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
-            </div>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navConteudo">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-            <div class="ms-auto d-flex align-items-center">
-                {% if session.usuario_id %}
-                    <div class="dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="{{ session.usuario_foto }}" alt="Foto de {{ session.usuario_nome }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #fff;">
-                            <span>Olá, {{ session.usuario_nome.split(' ')[0] }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                            <li><a class="dropdown-item" href="/perfil"><i class="fas fa-user-circle me-2"></i> Meu Perfil</a></li>
-                            <li><a class="dropdown-item" href="/meus-pedidos"><i class="fas fa-box me-2"></i> Meus Pedidos</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair da Conta</a></li>
-                        </ul>
-                    </div>
-                {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2 border-0 fw-bold">Entrar</a>
-                    <a href="{{ url_for('cadastro') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Criar Conta</a>
-                {% endif %}
+            <div class="collapse navbar-collapse" id="navConteudo">
 
-                <a href="/carrinho" class="btn btn-link text-white ms-3 position-relative">
-                    <i class="fas fa-shopping-cart fa-lg"></i>
+                <form action="/" method="GET" class="d-flex border rounded p-1 bg-white my-3 my-lg-0 ms-lg-4 flex-grow-1" style="max-width: 600px;">
+                    <input class="form-control border-0 shadow-none" type="search" name="busca" placeholder="O que você procura?" value="{{ request.args.get('busca', '') }}">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                </form>
 
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ total_itens }}
-                    </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    {% if session.usuario_id %}
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                <img src="{{ session.usuario_foto }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #fff;">
+                                <span>Olá, {{ session.usuario_nome.split(' ')[0] }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item" href="/perfil"><i class="fas fa-user-circle me-2"></i> Perfil</a></li>
+                                <li><a class="dropdown-item" href="/meus-pedidos"><i class="fas fa-box me-2"></i> Pedidos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-link text-white text-decoration-none fw-bold">Entrar</a>
+                        <a href="{{ url_for('cadastro') }}" class="btn btn-primary rounded-pill px-4 fw-bold">Criar Conta</a>
+                    {% endif %}
+
+                    <a href="/carrinho" class="btn btn-link text-white position-relative p-2">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                            {{ total_itens }}
+                        </span>
                     </a>
+                </div>
             </div>
         </div>
     </nav>

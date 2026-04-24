@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-box-open fa-2x text-primary me-3"></i>
+        <h2 class="fw-bold mb-0">Meus Pedidos</h2>
+    </div>
+
+    {% if pedidos %}
+        <div class="accordion shadow-sm" id="accordionPedidos">
+            
+            {% for pedido in pedidos %}
+            <div class="accordion-item border-0 mb-3 rounded-4 overflow-hidden shadow-sm">
+                
+                <h2 class="accordion-header" id="heading{{ pedido.id }}">
+                    <button class="accordion-button {{ '' if loop.first else 'collapsed' }} bg-light text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ pedido.id }}" aria-expanded="{{ 'true' if loop.first else 'false' }}">
+
+                        <span class="d-flex flex-wrap justify-content-between align-items-center w-100 pe-3">
+                            <span>
+                                <span class="fw-bold text-primary">Pedido #{{ pedido.id }}</span>
+                                <span class="text-muted ms-3"><i class="far fa-calendar-alt me-1"></i> {{ pedido.data.strftime('%d/%m/%Y às %H:%M') }}</span>
+                            </span>
+                            <span class="d-flex align-items-center gap-4 mt-2 mt-sm-0">
+                                <span class="fw-bold">R$ {{ "%.2f"|format(pedido.total) }}</span>
+
+                                {% if pedido.status == 'pendente' %}
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i> Aguardando Pagamento</span>
+                                {% elif pedido.status == 'pago' %}
+                                    <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-check me-1"></i> Pagamento Aprovado</span>
+                                {% elif pedido.status == 'cancelado' %}
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="fas fa-times me-1"></i> Cancelado</span>
+                                {% else %}
+                                    <span class="badge bg-info px-3 py-2 rounded-pill">{{ pedido.status|capitalize }}</span>
+                                {% endif %}
+                            </span>
+                        </span>
+
+                    </button>
+                </h2>
+
+                <div id="collapse{{ pedido.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#accordionPedidos">
+                    <div class="accordion-body p-0">
+
+                        {% if pedido.status == 'pendente' %}
+                        <div class="bg-warning bg-opacity-10 p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <span class="text-dark fw-bold"><i class="fas fa-exclamation-circle text-warning me-2"></i> Este pedido aguarda pagamento para ser processado.</span>
+
+                            <a href="{{ url_for('pagamento', pedido_id=pedido.id) }}" class="btn btn-success shadow-sm fw-bold rounded-pill px-4">
+                                <i class="fas fa-credit-card me-2"></i> Pagar Agora
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-nowrap">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Produto</th>
+                                        <th class="text-center">Quantidade</th>
+                                        <th class="text-end pe-4">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pedido.itens %}
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ item[2] if item[2] else '/static/img/produtos/placeholder.png' }}" class="rounded-3 me-3 border" style="width: 50px; height: 50px; object-fit: contain; background: #fff;">
+                                                <a href="/produto/{{ item[0] }}" class="text-decoration-none text-dark fw-bold">{{ item[1] }}</a>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ item[3] }}x</td>
+                                        <td class="text-end fw-bold pe-4">R$ {{ "%.2f"|format(item[3] * item[4]) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+        </div>
+    {% else %}
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm mt-4">
+            <i class="fas fa-receipt fa-4x text-muted mb-4"></i>
+            <h3 class="fw-bold">Nenhum pedido encontrado</h3>
+            <p class="text-muted">Você ainda não realizou nenhuma compra em nossa loja.</p>
+            <a href="/" class="btn btn-primary rounded-pill px-5 py-2 mt-2 fw-bold">Começar a Comprar</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .accordion-button:focus { box-shadow: none; border-color: rgba(0,0,0,.125); }
+    .accordion-button:not(.collapsed) { background-color: #f8fbff; color: #0d6efd; box-shadow: inset 0 -1px 0 rgba(0,0,0,.125); }
+</style>
+{% endblock %}
